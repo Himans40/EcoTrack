@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from 'react-nativ
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import HomeScreen from './screens/HomeScreen';
 
 // Navigation parameter list type definition
 export type RootStackParamList = {
@@ -10,37 +11,7 @@ export type RootStackParamList = {
   Detail: { locationId: number; locationName: string };
 };
 
-type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 type DetailScreenProps = NativeStackScreenProps<RootStackParamList, 'Detail'>;
-
-// 1. Initial HomeScreen Component
-function HomeScreen({ navigation }: HomeScreenProps) {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>EcoMonitor 🌿</Text>
-      <Text style={styles.subtitle}>Air & Water Quality Monitoring</Text>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Station Overview</Text>
-        <Text style={styles.cardDescription}>
-          Welcome to the EcoTrack telemetry dashboard. Tap below to test navigation to the Detail Screen.
-        </Text>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() =>
-            navigation.navigate('Detail', {
-              locationId: 1,
-              locationName: 'Central City Park',
-            })
-          }
-        >
-          <Text style={styles.buttonText}>View Station Details ➔</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-}
 
 // 2. Initial DetailScreen Component
 function DetailScreen({ route, navigation }: DetailScreenProps) {
