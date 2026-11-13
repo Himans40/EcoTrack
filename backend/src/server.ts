@@ -77,6 +77,34 @@ const fallbackStations = [
       timestamp: new Date().toISOString(),
     },
   },
+  {
+    id: 3,
+    name: 'Downtown Metro Hub',
+    lat: 28.6328,
+    lng: 77.2197,
+    latitude: 28.6328,
+    longitude: 77.2197,
+    latestAirReading: {
+      id: 3,
+      locationId: 3,
+      pm25: 28.5,
+      pm10: 68.0,
+      no2: 42.0,
+      aqiScore: 85.0,
+      aqi_score: 85.0,
+      timestamp: new Date().toISOString(),
+    },
+    latestWaterReading: {
+      id: 3,
+      locationId: 3,
+      ph: 6.8,
+      turbidity: 3.5,
+      dissolvedOxygen: 6.4,
+      wqiScore: 77.5,
+      wqi_score: 77.5,
+      timestamp: new Date().toISOString(),
+    },
+  },
 ];
 
 // Helper to generate 20 trend points for historical charts
