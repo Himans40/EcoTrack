@@ -1,0 +1,13 @@
+{
+  "name": "ecotrack-monorepo",
+  "version": "1.0.0",
+  "description": "EcoMonitor Monorepo - Air and Water Quality Monitoring System",
+  "scripts": {
+    "dev": "npm --prefix backend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:mobile": "npm --prefix mobile start",
+    "build:backend": "npm --prefix backend run build",
+    "start": "npm --prefix backend start"
+  }
+}
+
