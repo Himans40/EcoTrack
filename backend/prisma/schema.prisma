@@ -14,12 +14,12 @@ datasource db {
 model Location {
   id            Int            @id @default(autoincrement())
   name          String
-  latitude      Float
-  longitude     Float
+  lat           Float          // Latitude
+  lng           Float          // Longitude
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  // 1-to-many relationship with sensor readings
+  // 1-to-many relationship with telemetry readings
   airReadings   AirReading[]
   waterReadings WaterReading[]
 
@@ -32,11 +32,11 @@ model AirReading {
   locationId Int
   pm25       Float    // Particulate Matter ≤ 2.5 µm (µg/m³)
   pm10       Float    // Particulate Matter ≤ 10 µm (µg/m³)
-  co2        Float    // Carbon Dioxide (parts per million)
-  aqi_score  Float    // Standardized Air Quality Index (0 - 500)
+  no2        Float    // Nitrogen Dioxide (ppb / µg/m³)
+  aqiScore   Float    // Calculated Air Quality Index (0 - 500)
   timestamp  DateTime @default(now())
 
-  // Foreign key relation with cascade on delete
+  // Relation with cascade on delete
   location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
   @@index([locationId])
@@ -46,19 +46,18 @@ model AirReading {
 
 /// Represents a Water Quality sensor snapshot
 model WaterReading {
-  id               Int      @id @default(autoincrement())
-  locationId       Int
-  ph               Float    // Potential of Hydrogen (0 - 14)
-  turbidity        Float    // Water clarity/cloudiness in NTU
-  dissolved_oxygen Float    // Dissolved Oxygen (mg/L)
-  wqi_score        Float    // Standardized Water Quality Index (0 - 100)
-  timestamp        DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  locationId      Int
+  ph              Float    // Potential of Hydrogen (0 - 14)
+  turbidity       Float    // Turbidity (NTU)
+  dissolvedOxygen Float    // Dissolved Oxygen (mg/L)
+  wqiScore        Float    // Calculated Water Quality Index (0 - 100)
+  timestamp       DateTime @default(now())
 
-  // Foreign key relation with cascade on delete
-  location         Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  // Relation with cascade on delete
+  location        Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
   @@index([locationId])
   @@index([timestamp])
   @@map("water_readings")
 }
-

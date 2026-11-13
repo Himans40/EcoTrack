@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5001;
 // ==========================================
 // Middleware Configuration
 // ==========================================
-app.use(cors()); // Enable Cross-Origin Resource Sharing for mobile client access
+app.use(cors()); // Enable Cross-Origin Resource Sharing
 app.use(express.json()); // Parse incoming JSON request bodies
 
 // ==========================================
@@ -24,6 +24,8 @@ const fallbackStations = [
   {
     id: 1,
     name: 'Central City Park',
+    lat: 28.6139,
+    lng: 77.209,
     latitude: 28.6139,
     longitude: 77.209,
     latestAirReading: {
@@ -31,8 +33,9 @@ const fallbackStations = [
       locationId: 1,
       pm25: 14.0,
       pm10: 28.5,
-      co2: 415.0,
-      aqi_score: 42.0, // AQI < 50 -> Green (Good)
+      no2: 18.2,
+      aqiScore: 42.0,
+      aqi_score: 42.0,
       timestamp: new Date().toISOString(),
     },
     latestWaterReading: {
@@ -40,14 +43,17 @@ const fallbackStations = [
       locationId: 1,
       ph: 7.4,
       turbidity: 2.1,
-      dissolved_oxygen: 7.8,
-      wqi_score: 88.5, // WQI >= 80 -> Green (Excellent)
+      dissolvedOxygen: 7.8,
+      wqiScore: 88.5,
+      wqi_score: 88.5,
       timestamp: new Date().toISOString(),
     },
   },
   {
     id: 2,
     name: 'Riverside Industrial Zone',
+    lat: 28.5355,
+    lng: 77.391,
     latitude: 28.5355,
     longitude: 77.391,
     latestAirReading: {
@@ -55,8 +61,9 @@ const fallbackStations = [
       locationId: 2,
       pm25: 96.4,
       pm10: 182.2,
-      co2: 840.0,
-      aqi_score: 172.0, // AQI > 150 -> Red (Unhealthy)
+      no2: 65.4,
+      aqiScore: 172.0,
+      aqi_score: 172.0,
       timestamp: new Date().toISOString(),
     },
     latestWaterReading: {
@@ -64,8 +71,9 @@ const fallbackStations = [
       locationId: 2,
       ph: 5.6,
       turbidity: 16.8,
-      dissolved_oxygen: 3.1,
-      wqi_score: 38.0, // WQI < 50 -> Red (Poor)
+      dissolvedOxygen: 3.1,
+      wqiScore: 38.0,
+      wqi_score: 38.0,
       timestamp: new Date().toISOString(),
     },
   },
@@ -90,7 +98,8 @@ const generateMockHistory = (baseAqi: number, baseWqi: number, locationId: numbe
       locationId,
       pm25: parseFloat((aqi * 0.45).toFixed(1)),
       pm10: parseFloat((aqi * 0.95).toFixed(1)),
-      co2: Math.round(400 + aqi * 2),
+      no2: parseFloat((aqi * 0.35).toFixed(1)),
+      aqiScore: aqi,
       aqi_score: aqi,
       timestamp: time,
     });
@@ -100,7 +109,8 @@ const generateMockHistory = (baseAqi: number, baseWqi: number, locationId: numbe
       locationId,
       ph: parseFloat((7.0 + (wqi > 50 ? 0.3 : -1.2)).toFixed(1)),
       turbidity: parseFloat((wqi > 50 ? 2.5 : 14.0).toFixed(1)),
-      dissolved_oxygen: parseFloat((wqi > 50 ? 7.5 : 3.2).toFixed(1)),
+      dissolvedOxygen: parseFloat((wqi > 50 ? 7.5 : 3.2).toFixed(1)),
+      wqiScore: wqi,
       wqi_score: wqi,
       timestamp: time,
     });
@@ -113,6 +123,14 @@ const generateMockHistory = (baseAqi: number, baseWqi: number, locationId: numbe
 // 0. Health Check Endpoint
 // ==========================================
 app.get('/api/health', (_req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'ONLINE',
+    service: 'EcoMonitor Backend API',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'ONLINE',
     service: 'EcoMonitor Backend API',
@@ -144,10 +162,18 @@ app.get('/api/locations', async (_req: Request, res: Response) => {
       const responsePayload = locations.map((loc) => ({
         id: loc.id,
         name: loc.name,
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-        latestAirReading: loc.airReadings.length > 0 ? loc.airReadings[0] : null,
-        latestWaterReading: loc.waterReadings.length > 0 ? loc.waterReadings[0] : null,
+        lat: loc.lat,
+        lng: loc.lng,
+        latitude: loc.lat,
+        longitude: loc.lng,
+        latestAirReading: loc.airReadings.length > 0 ? {
+          ...loc.airReadings[0],
+          aqi_score: loc.airReadings[0].aqiScore,
+        } : null,
+        latestWaterReading: loc.waterReadings.length > 0 ? {
+          ...loc.waterReadings[0],
+          wqi_score: loc.waterReadings[0].wqiScore,
+        } : null,
       }));
 
       return res.status(200).json({
@@ -157,7 +183,6 @@ app.get('/api/locations', async (_req: Request, res: Response) => {
       });
     }
 
-    // If database is empty, return fallback data
     return res.status(200).json({
       success: true,
       count: fallbackStations.length,
@@ -209,11 +234,18 @@ app.get('/api/locations/:id', async (req: Request, res: Response) => {
           data: {
             id: location.id,
             name: location.name,
-            latitude: location.latitude,
-            longitude: location.longitude,
-            latestAirReading: location.airReadings.length > 0 ? location.airReadings[0] : null,
-            latestWaterReading:
-              location.waterReadings.length > 0 ? location.waterReadings[0] : null,
+            lat: location.lat,
+            lng: location.lng,
+            latitude: location.lat,
+            longitude: location.lng,
+            latestAirReading: location.airReadings.length > 0 ? {
+              ...location.airReadings[0],
+              aqi_score: location.airReadings[0].aqiScore,
+            } : null,
+            latestWaterReading: location.waterReadings.length > 0 ? {
+              ...location.waterReadings[0],
+              wqi_score: location.waterReadings[0].wqiScore,
+            } : null,
           },
         });
       }
@@ -270,8 +302,14 @@ app.get('/api/locations/:id/history', async (req: Request, res: Response) => {
           data: {
             locationId: location.id,
             locationName: location.name,
-            airHistory: [...location.airReadings].reverse(),
-            waterHistory: [...location.waterReadings].reverse(),
+            airHistory: [...location.airReadings].reverse().map(r => ({
+              ...r,
+              aqi_score: r.aqiScore,
+            })),
+            waterHistory: [...location.waterReadings].reverse().map(r => ({
+              ...r,
+              wqi_score: r.wqiScore,
+            })),
           },
         });
       }
@@ -316,11 +354,14 @@ app.post('/api/mock-sensor', async (req: Request, res: Response) => {
       type,
       pm25,
       pm10,
-      co2,
+      no2,
       aqi_score,
+      aqiScore,
       ph,
       turbidity,
+      dissolvedOxygen,
       dissolved_oxygen,
+      wqiScore,
       wqi_score,
     } = req.body;
 
@@ -331,29 +372,31 @@ app.post('/api/mock-sensor', async (req: Request, res: Response) => {
       });
     }
 
+    const calculatedAqi = parseFloat(aqiScore || aqi_score || 55);
+    const calculatedWqi = parseFloat(wqiScore || wqi_score || 80);
     const recordedData: { air?: any; water?: any } = {};
 
     try {
-      if (type === 'air' || aqi_score !== undefined) {
+      if (type === 'air' || aqi_score !== undefined || aqiScore !== undefined) {
         recordedData.air = await prisma.airReading.create({
           data: {
             locationId,
             pm25: parseFloat(pm25 || 25),
             pm10: parseFloat(pm10 || 50),
-            co2: parseFloat(co2 || 420),
-            aqi_score: parseFloat(aqi_score || 55),
+            no2: parseFloat(no2 || 20),
+            aqiScore: calculatedAqi,
           },
         });
       }
 
-      if (type === 'water' || wqi_score !== undefined) {
+      if (type === 'water' || wqi_score !== undefined || wqiScore !== undefined) {
         recordedData.water = await prisma.waterReading.create({
           data: {
             locationId,
             ph: parseFloat(ph || 7.2),
             turbidity: parseFloat(turbidity || 3.0),
-            dissolved_oxygen: parseFloat(dissolved_oxygen || 7.0),
-            wqi_score: parseFloat(wqi_score || 80),
+            dissolvedOxygen: parseFloat(dissolvedOxygen || dissolved_oxygen || 7.0),
+            wqiScore: calculatedWqi,
           },
         });
       }
@@ -364,10 +407,10 @@ app.post('/api/mock-sensor', async (req: Request, res: Response) => {
         data: recordedData,
       });
     } catch (dbErr) {
-      // If DB offline, acknowledge in-memory for smooth presentation demo
       const fallbackStation = fallbackStations.find((s) => s.id === locationId);
-      if (fallbackStation && aqi_score !== undefined) {
-        fallbackStation.latestAirReading.aqi_score = parseFloat(aqi_score);
+      if (fallbackStation && (aqiScore !== undefined || aqi_score !== undefined)) {
+        fallbackStation.latestAirReading.aqiScore = calculatedAqi;
+        fallbackStation.latestAirReading.aqi_score = calculatedAqi;
         if (pm25) fallbackStation.latestAirReading.pm25 = parseFloat(pm25);
         if (pm10) fallbackStation.latestAirReading.pm10 = parseFloat(pm10);
       }
@@ -375,7 +418,7 @@ app.post('/api/mock-sensor', async (req: Request, res: Response) => {
       return res.status(201).json({
         success: true,
         message: 'Simulated telemetry ingested successfully (demo mode).',
-        data: { locationId, aqi_score, wqi_score },
+        data: { locationId, aqiScore: calculatedAqi, wqiScore: calculatedWqi },
       });
     }
   } catch (error) {
@@ -396,7 +439,8 @@ const server = app.listen(PORT, () => {
   console.log(`🌍 EcoMonitor Backend Server listening on http://localhost:${PORT}`);
   console.log(`======================================================`);
   console.log(`📡 Ready Endpoints:`);
-  console.log(`   - GET  /api/health            -> Check server heartbeat`);
+  console.log(`   - GET  /health                -> Root heartbeat check`);
+  console.log(`   - GET  /api/health            -> API heartbeat check`);
   console.log(`   - GET  /api/locations         -> Fetch locations with latest readings`);
   console.log(`   - GET  /api/locations/:id     -> Fetch single location`);
   console.log(`   - GET  /api/locations/:id/history -> Fetch trend chart data`);

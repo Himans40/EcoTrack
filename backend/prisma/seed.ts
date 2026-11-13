@@ -5,33 +5,31 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seeding for EcoMonitor...');
 
-  // Reset database state for clean, repeatable demo runs
+  // Reset database state for clean demo
   await prisma.waterReading.deleteMany();
   await prisma.airReading.deleteMany();
   await prisma.location.deleteMany();
 
-  // --------------------------------------------------------------------------
-  // Location 1: Central City Park (Clean Eco-Zone -> Demonstrates "Green" State)
-  // --------------------------------------------------------------------------
+  // Location 1: Central City Park (Clean Eco-Zone)
   const locationPark = await prisma.location.create({
     data: {
       name: 'Central City Park',
-      latitude: 28.6139,
-      longitude: 77.2090,
+      lat: 28.6139,
+      lng: 77.209,
       airReadings: {
         create: [
           {
             pm25: 12.5,
             pm10: 25.0,
-            co2: 410.0,
-            aqi_score: 38.0, // AQI < 50 -> "Good" (Green)
-            timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 mins ago
+            no2: 15.0,
+            aqiScore: 38.0,
+            timestamp: new Date(Date.now() - 1000 * 60 * 15),
           },
           {
             pm25: 14.0,
             pm10: 28.5,
-            co2: 415.0,
-            aqi_score: 42.0, // Latest: AQI < 50 -> "Good" (Green)
+            no2: 18.2,
+            aqiScore: 42.0, // AQI < 50 -> "Good"
             timestamp: new Date(),
           },
         ],
@@ -41,8 +39,8 @@ async function main() {
           {
             ph: 7.4,
             turbidity: 2.1,
-            dissolved_oxygen: 7.8,
-            wqi_score: 88.5, // WQI >= 80 -> "Excellent/Good" (Green/Blue)
+            dissolvedOxygen: 7.8,
+            wqiScore: 88.5, // WQI >= 80 -> "Excellent"
             timestamp: new Date(),
           },
         ],
@@ -54,28 +52,26 @@ async function main() {
     },
   });
 
-  // --------------------------------------------------------------------------
-  // Location 2: Riverside Industrial Zone (Polluted -> Demonstrates "Red" State)
-  // --------------------------------------------------------------------------
+  // Location 2: Riverside Industrial Zone (Polluted Zone)
   const locationIndustrial = await prisma.location.create({
     data: {
       name: 'Riverside Industrial Zone',
-      latitude: 28.5355,
-      longitude: 77.3910,
+      lat: 28.5355,
+      lng: 77.391,
       airReadings: {
         create: [
           {
             pm25: 85.0,
             pm10: 160.0,
-            co2: 780.0,
-            aqi_score: 155.0,
+            no2: 60.0,
+            aqiScore: 155.0,
             timestamp: new Date(Date.now() - 1000 * 60 * 30),
           },
           {
             pm25: 96.4,
             pm10: 182.2,
-            co2: 840.0,
-            aqi_score: 172.0, // Latest: AQI > 150 -> "Unhealthy" (Red)
+            no2: 65.4,
+            aqiScore: 172.0, // AQI > 150 -> "Unhealthy"
             timestamp: new Date(),
           },
         ],
@@ -85,8 +81,8 @@ async function main() {
           {
             ph: 5.6,
             turbidity: 16.8,
-            dissolved_oxygen: 3.1,
-            wqi_score: 38.0, // WQI < 50 -> "Poor/Critical" (Red)
+            dissolvedOxygen: 3.1,
+            wqiScore: 38.0, // WQI < 50 -> "Poor"
             timestamp: new Date(),
           },
         ],
@@ -98,11 +94,9 @@ async function main() {
     },
   });
 
-  console.log('✅ Seeding completed successfully!');
-  console.log(`   📍 Location 1: "${locationPark.name}" (ID: ${locationPark.id})`);
-  console.log(`      Latest AQI: ${locationPark.airReadings[1].aqi_score} | Latest WQI: ${locationPark.waterReadings[0].wqi_score}`);
-  console.log(`   📍 Location 2: "${locationIndustrial.name}" (ID: ${locationIndustrial.id})`);
-  console.log(`      Latest AQI: ${locationIndustrial.airReadings[1].aqi_score} | Latest WQI: ${locationIndustrial.waterReadings[0].wqi_score}`);
+  console.log('✅ Seeding completed:');
+  console.log(`   📍 Station 1: ${locationPark.name} (ID: ${locationPark.id})`);
+  console.log(`   📍 Station 2: ${locationIndustrial.name} (ID: ${locationIndustrial.id})`);
 }
 
 main()
@@ -113,4 +107,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
