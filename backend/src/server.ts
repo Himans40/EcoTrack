@@ -76,6 +76,105 @@ app.get('/api/locations', async (_req: Request, res: Response) => {
 });
 
 // ==========================================
+// 2. GET /api/locations/:id
+// Returns a single location along with its latest Air and Water readings
+// ==========================================
+app.get('/api/locations/:id', async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid location ID.' });
+    }
+
+    const location = await prisma.location.findUnique({
+      where: { id },
+      include: {
+        airReadings: {
+          orderBy: { timestamp: 'desc' },
+          take: 1,
+        },
+        waterReadings: {
+          orderBy: { timestamp: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    if (!location) {
+      return res.status(404).json({ success: false, message: 'Location not found.' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        id: location.id,
+        name: location.name,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latestAirReading: location.airReadings.length > 0 ? location.airReadings[0] : null,
+        latestWaterReading: location.waterReadings.length > 0 ? location.waterReadings[0] : null,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching location:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve location.',
+      error: error instanceof Error ? error.message : 'Unknown internal error',
+    });
+  }
+});
+
+// ==========================================
+// 3. GET /api/locations/:id/history
+// Returns chronological historical sensor readings (last 20) for trend charts
+// ==========================================
+app.get('/api/locations/:id/history', async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid location ID.' });
+    }
+
+    const location = await prisma.location.findUnique({
+      where: { id },
+      include: {
+        airReadings: {
+          orderBy: { timestamp: 'desc' },
+          take: 20,
+        },
+        waterReadings: {
+          orderBy: { timestamp: 'desc' },
+          take: 20,
+        },
+      },
+    });
+
+    if (!location) {
+      return res.status(404).json({ success: false, message: 'Location not found.' });
+    }
+
+    // Reverse descending readings into chronological order (oldest -> newest) for charting
+    return res.status(200).json({
+      success: true,
+      data: {
+        locationId: location.id,
+        locationName: location.name,
+        airHistory: [...location.airReadings].reverse(),
+        waterHistory: [...location.waterReadings].reverse(),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching location history:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve location history.',
+      error: error instanceof Error ? error.message : 'Unknown internal error',
+    });
+  }
+});
+
+// ==========================================
 // 2. POST /api/mock-sensor
 // Endpoint to ingest simulated IoT sensor readings (Air, Water, or both)
 // ==========================================
