@@ -7,14 +7,16 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   SafeAreaView,
+  RefreshControl,
+  Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
-import { getLocations, Location } from '../services/api';
+import { getLocations, postMockSensorData, Location } from '../services/api';
 
 type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
-// Helper: Color logic for quick AQI indicator badge
+// Helper: Dynamic badge color for AQI
 const getAqiBadgeColor = (aqi: number | undefined | null) => {
   if (aqi === undefined || aqi === null) return '#64748B';
   if (aqi <= 50) return '#10B981'; // Green (Good)
@@ -23,7 +25,7 @@ const getAqiBadgeColor = (aqi: number | undefined | null) => {
   return '#EF4444'; // Red (Unhealthy)
 };
 
-// Helper: Color logic for quick WQI indicator badge
+// Helper: Dynamic badge color for WQI
 const getWqiBadgeColor = (wqi: number | undefined | null) => {
   if (wqi === undefined || wqi === null) return '#64748B';
   if (wqi >= 80) return '#10B981'; // Green (Excellent)
@@ -34,15 +36,19 @@ const getWqiBadgeColor = (wqi: number | undefined | null) => {
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string>('Just now');
 
   // Fetch telemetry stations from backend API
-  const fetchLocationsList = useCallback(async () => {
+  const fetchLocationsList = useCallback(async (isPullToRefresh = false) => {
     try {
-      setLoading(true);
+      if (!isPullToRefresh) setLoading(true);
       setError(null);
       const data = await getLocations();
       setLocations(data);
+      const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setLastUpdated(currentTime);
     } catch (err) {
       console.error('Failed to load stations:', err);
       setError(
@@ -50,6 +56,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       );
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -58,15 +65,47 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     fetchLocationsList();
   }, [fetchLocationsList]);
 
-  // Render individual station item
+  // Pull-to-refresh handler (Feature 6)
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchLocationsList(true);
+  }, [fetchLocationsList]);
+
+  // Demo helper: Injects mock telemetry for instant pull-to-refresh presentation testing
+  const handleSimulateIoT = async (locationId: number, locationName: string) => {
+    try {
+      const randomAqi = Math.floor(Math.random() * 170) + 25;
+      await postMockSensorData({
+        locationId,
+        type: 'air',
+        aqi_score: randomAqi,
+        pm25: parseFloat((randomAqi * 0.45).toFixed(1)),
+        pm10: parseFloat((randomAqi * 0.95).toFixed(1)),
+        co2: 420,
+      });
+      Alert.alert(
+        '⚡ IoT Telemetry Injected',
+        `Simulated incoming sensor burst for "${locationName}". Swipe down to refresh!`
+      );
+      fetchLocationsList(true);
+    } catch (err) {
+      Alert.alert('Simulation Notice', 'Could not post simulated IoT reading.');
+    }
+  };
+
+  // Render individual station card with polished depth & shadows
   const renderLocationCard = ({ item }: { item: Location }) => {
     const aqi = item.latestAirReading?.aqi_score;
     const wqi = item.latestWaterReading?.wqi_score;
+    const isCleanZone = aqi !== undefined && aqi !== null && aqi < 50;
 
     return (
       <TouchableOpacity
-        style={styles.card}
-        activeOpacity={0.7}
+        style={[
+          styles.card,
+          { borderLeftColor: isCleanZone ? '#10B981' : '#EF4444', borderLeftWidth: 4 },
+        ]}
+        activeOpacity={0.8}
         onPress={() =>
           navigation.navigate('Detail', {
             locationId: item.id,
@@ -76,31 +115,51 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       >
         <View style={styles.cardHeader}>
           <View style={styles.titleContainer}>
-            <Text style={styles.stationName}>{item.name}</Text>
+            <View style={styles.nameRow}>
+              <Text style={styles.stationName}>{item.name}</Text>
+              <View
+                style={[
+                  styles.statusDot,
+                  { backgroundColor: isCleanZone ? '#10B981' : '#EF4444' },
+                ]}
+              />
+            </View>
             <Text style={styles.coords}>
               Lat: {item.latitude.toFixed(4)} | Long: {item.longitude.toFixed(4)}
             </Text>
           </View>
-          <Text style={styles.chevron}>➔</Text>
+          <View style={styles.chevronWrapper}>
+            <Text style={styles.chevron}>➔</Text>
+          </View>
         </View>
 
-        {/* Quick Environmental Scores Row */}
-        <View style={styles.badgeRow}>
-          {/* AQI Badge */}
-          <View style={[styles.badge, { borderColor: getAqiBadgeColor(aqi) }]}>
-            <Text style={styles.badgeLabel}>AQI</Text>
-            <Text style={[styles.badgeValue, { color: getAqiBadgeColor(aqi) }]}>
-              {aqi !== undefined && aqi !== null ? Math.round(aqi) : '--'}
-            </Text>
+        {/* Environmental Scores & Ingestion Row */}
+        <View style={styles.footerRow}>
+          <View style={styles.badgeRow}>
+            {/* AQI Badge */}
+            <View style={[styles.badge, { borderColor: getAqiBadgeColor(aqi) }]}>
+              <Text style={styles.badgeLabel}>AQI</Text>
+              <Text style={[styles.badgeValue, { color: getAqiBadgeColor(aqi) }]}>
+                {aqi !== undefined && aqi !== null ? Math.round(aqi) : '--'}
+              </Text>
+            </View>
+
+            {/* WQI Badge */}
+            <View style={[styles.badge, { borderColor: getWqiBadgeColor(wqi) }]}>
+              <Text style={styles.badgeLabel}>WQI</Text>
+              <Text style={[styles.badgeValue, { color: getWqiBadgeColor(wqi) }]}>
+                {wqi !== undefined && wqi !== null ? Math.round(wqi) : '--'}
+              </Text>
+            </View>
           </View>
 
-          {/* WQI Badge */}
-          <View style={[styles.badge, { borderColor: getWqiBadgeColor(wqi) }]}>
-            <Text style={styles.badgeLabel}>WQI</Text>
-            <Text style={[styles.badgeValue, { color: getWqiBadgeColor(wqi) }]}>
-              {wqi !== undefined && wqi !== null ? Math.round(wqi) : '--'}
-            </Text>
-          </View>
+          {/* Quick Mock Ingestion trigger for live presentation demo */}
+          <TouchableOpacity
+            style={styles.simButton}
+            onPress={() => handleSimulateIoT(item.id, item.name)}
+          >
+            <Text style={styles.simButtonText}>⚡ Pulse IoT</Text>
+          </TouchableOpacity>
         </View>
       </TouchableOpacity>
     );
@@ -109,10 +168,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* 1. LOADING STATE */}
-      {loading && (
+      {loading && !refreshing && (
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color="#38BDF8" />
-          <Text style={styles.loadingText}>Loading environmental monitoring stations...</Text>
+          <Text style={styles.loadingText}>Syncing environmental telemetry stations...</Text>
         </View>
       )}
 
@@ -122,25 +181,48 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           <View style={styles.errorCard}>
             <Text style={styles.errorTitle}>Network Connection Notice</Text>
             <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={fetchLocationsList}>
+            <TouchableOpacity style={styles.retryButton} onPress={() => fetchLocationsList(false)}>
               <Text style={styles.retryButtonText}>Retry Connection</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
 
-      {/* 3. LOCATIONS LIST */}
+      {/* 3. LOCATIONS LIST WITH PULL-TO-REFRESH */}
       {!loading && !error && (
         <FlatList
           data={locations}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderLocationCard}
           contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#38BDF8"
+              colors={['#38BDF8', '#10B981']}
+              title="Pulling latest telemetry..."
+              titleColor="#94A3B8"
+            />
+          }
           ListHeaderComponent={
             <View style={styles.headerComponent}>
+              {/* Telemetry Status Pill */}
+              <View style={styles.networkStatusCard}>
+                <View style={styles.networkPulse}>
+                  <View style={styles.pulseInner} />
+                </View>
+                <View style={styles.networkInfo}>
+                  <Text style={styles.networkStatusTitle}>TELEMETRY NETWORK ACTIVE</Text>
+                  <Text style={styles.networkSubtitle}>
+                    {locations.length} station(s) reporting • Last synced: {lastUpdated}
+                  </Text>
+                </View>
+              </View>
+
               <Text style={styles.sectionTitle}>ACTIVE MONITORING STATIONS</Text>
               <Text style={styles.sectionSubtitle}>
-                Select a station to inspect live telemetry and historical trends
+                Swipe down to refresh telemetry • Tap a card to view historical trends
               </Text>
             </View>
           }
@@ -158,7 +240,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0F172A', // Slate 900
+    backgroundColor: '#0F172A', // Deep Slate
   },
   listContent: {
     padding: 16,
@@ -166,6 +248,50 @@ const styles = StyleSheet.create({
   },
   headerComponent: {
     marginBottom: 16,
+  },
+  networkStatusCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1E293B',
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#334155',
+    marginBottom: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  networkPulse: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(56, 189, 248, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  pulseInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#38BDF8',
+  },
+  networkInfo: {
+    flex: 1,
+  },
+  networkStatusTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#38BDF8',
+    letterSpacing: 0.8,
+  },
+  networkSubtitle: {
+    fontSize: 12,
+    color: '#94A3B8',
+    marginTop: 2,
   },
   sectionTitle: {
     fontSize: 12,
@@ -180,11 +306,17 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#1E293B',
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 14,
     borderWidth: 1,
     borderColor: '#334155',
+    // Polished Cross-Platform Shadows (Feature 6)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 6,
+    elevation: 4,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -195,44 +327,85 @@ const styles = StyleSheet.create({
   titleContainer: {
     flex: 1,
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   stationName: {
     fontSize: 17,
     fontWeight: '700',
     color: '#F8FAFC',
   },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
   coords: {
     fontSize: 11,
     color: '#64748B',
-    marginTop: 2,
+    marginTop: 3,
+  },
+  chevronWrapper: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#0F172A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: '#334155',
   },
   chevron: {
-    fontSize: 18,
+    fontSize: 14,
     color: '#38BDF8',
     fontWeight: 'bold',
-    marginLeft: 8,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#334155',
   },
   badgeRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#0F172A',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 9,
     borderRadius: 8,
     borderWidth: 1.5,
-    gap: 6,
+    gap: 5,
   },
   badgeLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
     color: '#94A3B8',
   },
   badgeValue: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
+  },
+  simButton: {
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.3)',
+  },
+  simButtonText: {
+    fontSize: 11,
+    color: '#38BDF8',
+    fontWeight: '700',
   },
   centerContainer: {
     flex: 1,
@@ -254,8 +427,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#451A1A',
     borderColor: '#991B1B',
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   errorTitle: {
     color: '#FCA5A5',
@@ -273,7 +450,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EF4444',
     paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 6,
+    borderRadius: 8,
     alignSelf: 'flex-start',
   },
   retryButtonText: {
@@ -291,4 +468,3 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 });
-

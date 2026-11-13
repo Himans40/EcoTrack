@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Dimensions,
+  RefreshControl,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LineChart } from 'react-native-chart-kit';
@@ -61,15 +62,16 @@ export default function DetailScreen({ route, navigation }: DetailScreenProps) {
   const [location, setLocation] = useState<Location | null>(null);
   const [history, setHistory] = useState<LocationHistoryResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   // Active chart metric toggle: 'aqi' | 'wqi'
   const [chartMetric, setChartMetric] = useState<'aqi' | 'wqi'>('aqi');
 
   // Fetch both the current reading and historical telemetry (last 20 readings)
-  const fetchTelemetry = useCallback(async () => {
+  const fetchTelemetry = useCallback(async (isPullToRefresh = false) => {
     try {
-      setLoading(true);
+      if (!isPullToRefresh) setLoading(true);
       setError(null);
       const [stationData, historyData] = await Promise.all([
         getLocationById(locationId),
@@ -82,11 +84,17 @@ export default function DetailScreen({ route, navigation }: DetailScreenProps) {
       setError('Failed to fetch real-time telemetry or historical trends.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [locationId]);
 
   useEffect(() => {
     fetchTelemetry();
+  }, [fetchTelemetry]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchTelemetry(true);
   }, [fetchTelemetry]);
 
   const airReading = location?.latestAirReading;
@@ -128,9 +136,19 @@ export default function DetailScreen({ route, navigation }: DetailScreenProps) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#38BDF8"
+            colors={['#38BDF8', '#10B981']}
+          />
+        }
+      >
         {/* 1. LOADING STATE */}
-        {loading && (
+        {loading && !refreshing && (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color="#38BDF8" />
             <Text style={styles.loadingText}>Fetching real-time telemetry & historical charts...</Text>
@@ -405,6 +423,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
   },
   stationTitle: {
     fontSize: 20,
@@ -453,11 +476,16 @@ const styles = StyleSheet.create({
   },
   scoreCard: {
     flex: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 16,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#334155',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
   },
   scoreCategory: {
     fontSize: 10,
@@ -489,6 +517,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#334155',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 8,
+    elevation: 4,
   },
   chartToggleContainer: {
     flexDirection: 'row',
