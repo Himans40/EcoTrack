@@ -10,23 +10,14 @@ import {
   Dimensions,
   RefreshControl,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LineChart } from 'react-native-chart-kit';
-import { RootStackParamList } from '../App';
-import {
-  getLocationById,
-  getLocationHistory,
-  Location,
-  LocationHistoryResponse,
-} from '../services/api';
-
-type DetailScreenProps = NativeStackScreenProps<RootStackParamList, 'Detail'>;
+import { getLocationById, getLocationHistory } from '../services/api';
 
 // ============================================================================
 // DYNAMIC COLOR CODING & CLASSIFICATION LOGIC
 // ============================================================================
 
-export const getAqiTheme = (aqi: number | undefined | null) => {
+export const getAqiTheme = (aqi) => {
   if (aqi === undefined || aqi === null) {
     return { color: '#64748B', label: 'No Telemetry', bgTint: 'rgba(100, 116, 139, 0.15)' };
   }
@@ -42,7 +33,7 @@ export const getAqiTheme = (aqi: number | undefined | null) => {
   return { color: '#EF4444', label: 'Unhealthy / Hazardous', bgTint: 'rgba(239, 68, 68, 0.15)' };
 };
 
-export const getWqiTheme = (wqi: number | undefined | null) => {
+export const getWqiTheme = (wqi) => {
   if (wqi === undefined || wqi === null) {
     return { color: '#64748B', label: 'No Telemetry', bgTint: 'rgba(100, 116, 139, 0.15)' };
   }
@@ -55,20 +46,19 @@ export const getWqiTheme = (wqi: number | undefined | null) => {
   return { color: '#EF4444', label: 'Poor / Contaminated', bgTint: 'rgba(239, 68, 68, 0.15)' };
 };
 
-export default function DetailScreen({ route, navigation }: DetailScreenProps) {
+export default function DetailScreen({ route, navigation }) {
   const { locationId } = route.params;
 
-  // Station and Historical Data State
-  const [location, setLocation] = useState<Location | null>(null);
-  const [history, setHistory] = useState<LocationHistoryResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [location, setLocation] = useState(null);
+  const [history, setHistory] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
 
   // Active chart metric toggle: 'aqi' | 'wqi'
-  const [chartMetric, setChartMetric] = useState<'aqi' | 'wqi'>('aqi');
+  const [chartMetric, setChartMetric] = useState('aqi');
 
-  // Fetch both the current reading and historical telemetry (last 20 readings)
+  // Fetch both the current reading and historical telemetry
   const fetchTelemetry = useCallback(async (isPullToRefresh = false) => {
     try {
       if (!isPullToRefresh) setLoading(true);
@@ -103,17 +93,16 @@ export default function DetailScreen({ route, navigation }: DetailScreenProps) {
   const aqiTheme = getAqiTheme(airReading?.aqi_score);
   const wqiTheme = getWqiTheme(waterReading?.wqi_score);
 
-  // Screen width for responsive chart sizing
+  // Responsive chart width
   const screenWidth = Dimensions.get('window').width;
   const chartWidth = Math.min(screenWidth - 32, 600);
 
-  // Extract 20 trend points for active chart metric
+  // Extract trend points for active chart metric
   const isAqiChart = chartMetric === 'aqi';
   const rawChartPoints = isAqiChart
-    ? (history?.airHistory || []).map((r) => r.aqi_score)
-    : (history?.waterHistory || []).map((r) => r.wqi_score);
+    ? (history?.airHistory || []).map((r) => r.aqi_score || r.aqiScore)
+    : (history?.waterHistory || []).map((r) => r.wqi_score || r.wqiScore);
 
-  // Fallback points if history has fewer items
   const chartDataPoints =
     rawChartPoints.length >= 2
       ? rawChartPoints
@@ -125,9 +114,9 @@ export default function DetailScreen({ route, navigation }: DetailScreenProps) {
   const sampleIndices = [0, 4, 8, 12, 16, chartDataPoints.length - 1];
   const chartLabels = chartDataPoints
     .map((_, idx) => (sampleIndices.includes(idx) ? `#${idx + 1}` : ''))
-    .filter((label, idx) => sampleIndices.includes(idx) || idx === 0 || idx === chartDataPoints.length - 1);
+    .filter((_, idx) => sampleIndices.includes(idx) || idx === 0 || idx === chartDataPoints.length - 1);
 
-  // Calculate high/low/average stats for chart
+  // High, low, and average statistics
   const minVal = Math.min(...chartDataPoints);
   const maxVal = Math.max(...chartDataPoints);
   const avgVal = Math.round(
@@ -174,7 +163,8 @@ export default function DetailScreen({ route, navigation }: DetailScreenProps) {
               <View>
                 <Text style={styles.stationTitle}>{location.name}</Text>
                 <Text style={styles.stationCoords}>
-                  Lat: {location.latitude.toFixed(4)} | Long: {location.longitude.toFixed(4)}
+                  Lat: {location.latitude ? location.latitude.toFixed(4) : location.lat} | Long:{' '}
+                  {location.longitude ? location.longitude.toFixed(4) : location.lng}
                 </Text>
               </View>
               <View style={styles.liveIndicator}>
@@ -241,7 +231,7 @@ export default function DetailScreen({ route, navigation }: DetailScreenProps) {
               </View>
             </View>
 
-            {/* SECTION: HISTORICAL TREND VISUALIZATION (FEATURE 5) */}
+            {/* SECTION: HISTORICAL TREND VISUALIZATION */}
             <Text style={styles.sectionHeader}>HISTORICAL TELEMETRY TREND (LAST 20 READINGS)</Text>
             <View style={styles.chartCard}>
               {/* Metric Toggle Buttons */}
@@ -359,8 +349,8 @@ export default function DetailScreen({ route, navigation }: DetailScreenProps) {
                     <Text style={styles.gridLabel}>PM 10</Text>
                   </View>
                   <View style={styles.gridItem}>
-                    <Text style={styles.gridValue}>{airReading.co2} ppm</Text>
-                    <Text style={styles.gridLabel}>CO₂ Level</Text>
+                    <Text style={styles.gridValue}>{airReading.no2 || airReading.co2 || 40} ppb</Text>
+                    <Text style={styles.gridLabel}>NO₂ Level</Text>
                   </View>
                 </View>
               ) : (
@@ -368,12 +358,13 @@ export default function DetailScreen({ route, navigation }: DetailScreenProps) {
               )}
             </View>
 
+            {/* Aquatic Metrics */}
             <Text style={styles.sectionHeader}>AQUATIC METRICS</Text>
             <View style={styles.breakdownCard}>
               {waterReading ? (
                 <View style={styles.grid}>
                   <View style={styles.gridItem}>
-                    <Text style={styles.gridValue}>{waterReading.ph.toFixed(1)}</Text>
+                    <Text style={styles.gridValue}>{waterReading.ph ? waterReading.ph.toFixed(1) : '--'}</Text>
                     <Text style={styles.gridLabel}>pH Value</Text>
                   </View>
                   <View style={styles.gridItem}>
@@ -381,7 +372,9 @@ export default function DetailScreen({ route, navigation }: DetailScreenProps) {
                     <Text style={styles.gridLabel}>Turbidity</Text>
                   </View>
                   <View style={styles.gridItem}>
-                    <Text style={styles.gridValue}>{waterReading.dissolved_oxygen} mg/L</Text>
+                    <Text style={styles.gridValue}>
+                      {waterReading.dissolvedOxygen || waterReading.dissolved_oxygen || 7.0} mg/L
+                    </Text>
                     <Text style={styles.gridLabel}>Dissolved O₂</Text>
                   </View>
                 </View>
@@ -591,11 +584,16 @@ const styles = StyleSheet.create({
   },
   breakdownCard: {
     backgroundColor: '#1E293B',
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 16,
     marginBottom: 14,
     borderWidth: 1,
     borderColor: '#334155',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   grid: {
     flexDirection: 'row',

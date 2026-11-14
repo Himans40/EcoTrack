@@ -10,14 +10,10 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../App';
-import { getLocations, postMockSensorData, Location } from '../services/api';
-
-type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
+import { getLocations, postMockSensorData } from '../services/api';
 
 // Helper: Dynamic badge color for AQI
-const getAqiBadgeColor = (aqi: number | undefined | null) => {
+const getAqiBadgeColor = (aqi) => {
   if (aqi === undefined || aqi === null) return '#64748B';
   if (aqi <= 50) return '#10B981'; // Green (Good)
   if (aqi <= 100) return '#F59E0B'; // Amber (Moderate)
@@ -26,19 +22,19 @@ const getAqiBadgeColor = (aqi: number | undefined | null) => {
 };
 
 // Helper: Dynamic badge color for WQI
-const getWqiBadgeColor = (wqi: number | undefined | null) => {
+const getWqiBadgeColor = (wqi) => {
   if (wqi === undefined || wqi === null) return '#64748B';
   if (wqi >= 80) return '#10B981'; // Green (Excellent)
   if (wqi >= 50) return '#F59E0B'; // Amber (Moderate)
   return '#EF4444'; // Red (Poor)
 };
 
-export default function HomeScreen({ navigation }: HomeScreenProps) {
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<string>('Just now');
+export default function HomeScreen({ navigation }) {
+  const [locations, setLocations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState('Just now');
 
   // Fetch telemetry stations from backend API
   const fetchLocationsList = useCallback(async (isPullToRefresh = false) => {
@@ -47,7 +43,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       setError(null);
       const data = await getLocations();
       setLocations(data);
-      const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const currentTime = new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
       setLastUpdated(currentTime);
     } catch (err) {
       console.error('Failed to load stations:', err);
@@ -60,19 +60,18 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   }, []);
 
-  // Fetch on mount
   useEffect(() => {
     fetchLocationsList();
   }, [fetchLocationsList]);
 
-  // Pull-to-refresh handler (Feature 6)
+  // Pull-to-refresh handler
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchLocationsList(true);
   }, [fetchLocationsList]);
 
-  // Demo helper: Injects mock telemetry for instant pull-to-refresh presentation testing
-  const handleSimulateIoT = async (locationId: number, locationName: string) => {
+  // Demo helper: Injects mock telemetry for instant pull-to-refresh testing
+  const handleSimulateIoT = async (locationId, locationName) => {
     try {
       const randomAqi = Math.floor(Math.random() * 170) + 25;
       await postMockSensorData({
@@ -81,7 +80,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         aqi_score: randomAqi,
         pm25: parseFloat((randomAqi * 0.45).toFixed(1)),
         pm10: parseFloat((randomAqi * 0.95).toFixed(1)),
-        co2: 420,
+        no2: 42,
       });
       Alert.alert(
         '⚡ IoT Telemetry Injected',
@@ -93,8 +92,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   };
 
-  // Render individual station card with polished depth & shadows
-  const renderLocationCard = ({ item }: { item: Location }) => {
+  // Render individual station card
+  const renderLocationCard = ({ item }) => {
     const aqi = item.latestAirReading?.aqi_score;
     const wqi = item.latestWaterReading?.wqi_score;
     const isCleanZone = aqi !== undefined && aqi !== null && aqi < 50;
@@ -125,7 +124,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               />
             </View>
             <Text style={styles.coords}>
-              Lat: {item.latitude.toFixed(4)} | Long: {item.longitude.toFixed(4)}
+              Lat: {item.latitude ? item.latitude.toFixed(4) : item.lat} | Long:{' '}
+              {item.longitude ? item.longitude.toFixed(4) : item.lng}
             </Text>
           </View>
           <View style={styles.chevronWrapper}>
@@ -133,7 +133,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           </View>
         </View>
 
-        {/* Environmental Scores & Ingestion Row */}
+        {/* Environmental Scores & Actions */}
         <View style={styles.footerRow}>
           <View style={styles.badgeRow}>
             {/* AQI Badge */}
@@ -207,7 +207,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           }
           ListHeaderComponent={
             <View style={styles.headerComponent}>
-              {/* Telemetry Status Pill */}
               <View style={styles.networkStatusCard}>
                 <View style={styles.networkPulse}>
                   <View style={styles.pulseInner} />
@@ -240,7 +239,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0F172A', // Deep Slate
+    backgroundColor: '#0F172A',
   },
   listContent: {
     padding: 16,
@@ -311,7 +310,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     borderWidth: 1,
     borderColor: '#334155',
-    // Polished Cross-Platform Shadows (Feature 6)
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.28,

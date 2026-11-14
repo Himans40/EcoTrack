@@ -1,7 +1,8 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const { PrismaClient } = require('@prisma/client');
+const { calculateAQI, calculateWQI } = require('./src/utils/calculators');
 
 // Load environment variables from .env
 dotenv.config();
@@ -14,8 +15,8 @@ const PORT = process.env.PORT || 5001;
 // ==========================================
 // Middleware Configuration
 // ==========================================
-app.use(cors()); // Enable Cross-Origin Resource Sharing
-app.use(express.json()); // Parse incoming JSON request bodies
+app.use(cors());
+app.use(express.json());
 
 // ==========================================
 // In-Memory Fallback Seed Data (Safe presentation fallback if DB offline)
@@ -108,7 +109,7 @@ const fallbackStations = [
 ];
 
 // Helper to generate 20 trend points for historical charts
-const generateMockHistory = (baseAqi: number, baseWqi: number, locationId: number) => {
+function generateMockHistory(baseAqi, baseWqi, locationId) {
   const airHistory = [];
   const waterHistory = [];
   const now = Date.now();
@@ -145,32 +146,31 @@ const generateMockHistory = (baseAqi: number, baseWqi: number, locationId: numbe
   }
 
   return { airHistory, waterHistory };
-};
+}
 
 // ==========================================
-// 0. Health Check Endpoint
+// 0. Health Check Endpoints
 // ==========================================
-app.get('/api/health', (_req: Request, res: Response) => {
+app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ONLINE',
-    service: 'EcoMonitor Backend API',
+    service: 'EcoMonitor Backend API (JavaScript)',
     timestamp: new Date().toISOString(),
   });
 });
 
-app.get('/health', (_req: Request, res: Response) => {
+app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ONLINE',
-    service: 'EcoMonitor Backend API',
+    service: 'EcoMonitor Backend API (JavaScript)',
     timestamp: new Date().toISOString(),
   });
 });
 
 // ==========================================
 // 1. GET /api/locations
-// Returns all locations along with their most recent Air and Water readings
 // ==========================================
-app.get('/api/locations', async (_req: Request, res: Response) => {
+app.get('/api/locations', async (req, res) => {
   try {
     const locations = await prisma.location.findMany({
       include: {
@@ -217,9 +217,7 @@ app.get('/api/locations', async (_req: Request, res: Response) => {
       data: fallbackStations,
     });
   } catch (error) {
-    console.warn(
-      '⚠️ PostgreSQL database unavailable or unseeded. Falling back to built-in telemetry stations.'
-    );
+    console.warn('⚠️ PostgreSQL database unavailable or unseeded. Serving demo stations.');
     return res.status(200).json({
       success: true,
       count: fallbackStations.length,
@@ -230,12 +228,10 @@ app.get('/api/locations', async (_req: Request, res: Response) => {
 
 // ==========================================
 // 2. GET /api/locations/:id
-// Returns a single location along with its latest Air and Water readings
 // ==========================================
-app.get('/api/locations/:id', async (req: Request, res: Response) => {
+app.get('/api/locations/:id', async (req, res) => {
   try {
-    const idParam = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-    const id = parseInt(idParam, 10);
+    const id = parseInt(req.params.id, 10);
 
     if (isNaN(id)) {
       return res.status(400).json({ success: false, message: 'Invalid location ID.' });
@@ -291,19 +287,17 @@ app.get('/api/locations/:id', async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to retrieve location.',
-      error: error instanceof Error ? error.message : 'Unknown internal error',
+      error: error.message || 'Unknown internal error',
     });
   }
 });
 
 // ==========================================
 // 3. GET /api/locations/:id/history
-// Returns chronological historical sensor readings (last 20) for trend charts
 // ==========================================
-app.get('/api/locations/:id/history', async (req: Request, res: Response) => {
+app.get('/api/locations/:id/history', async (req, res) => {
   try {
-    const idParam = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-    const id = parseInt(idParam, 10);
+    const id = parseInt(req.params.id, 10);
 
     if (isNaN(id)) {
       return res.status(400).json({ success: false, message: 'Invalid location ID.' });
@@ -330,11 +324,11 @@ app.get('/api/locations/:id/history', async (req: Request, res: Response) => {
           data: {
             locationId: location.id,
             locationName: location.name,
-            airHistory: [...location.airReadings].reverse().map(r => ({
+            airHistory: [...location.airReadings].reverse().map((r) => ({
               ...r,
               aqi_score: r.aqiScore,
             })),
-            waterHistory: [...location.waterReadings].reverse().map(r => ({
+            waterHistory: [...location.waterReadings].reverse().map((r) => ({
               ...r,
               wqi_score: r.wqiScore,
             })),
@@ -366,16 +360,15 @@ app.get('/api/locations/:id/history', async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to retrieve location history.',
-      error: error instanceof Error ? error.message : 'Unknown internal error',
+      error: error.message || 'Unknown internal error',
     });
   }
 });
 
 // ==========================================
 // 4. POST /api/mock-sensor
-// Endpoint to ingest simulated IoT sensor readings
 // ==========================================
-app.post('/api/mock-sensor', async (req: Request, res: Response) => {
+app.post('/api/mock-sensor', async (req, res) => {
   try {
     const {
       locationId,
@@ -402,7 +395,7 @@ app.post('/api/mock-sensor', async (req: Request, res: Response) => {
 
     const calculatedAqi = parseFloat(aqiScore || aqi_score || 55);
     const calculatedWqi = parseFloat(wqiScore || wqi_score || 80);
-    const recordedData: { air?: any; water?: any } = {};
+    const recordedData = {};
 
     try {
       if (type === 'air' || aqi_score !== undefined || aqiScore !== undefined) {
@@ -454,7 +447,7 @@ app.post('/api/mock-sensor', async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: 'Internal server error while processing sensor data.',
-      error: error instanceof Error ? error.message : 'Unknown internal error',
+      error: error.message || 'Unknown internal error',
     });
   }
 });
@@ -464,19 +457,11 @@ app.post('/api/mock-sensor', async (req: Request, res: Response) => {
 // ==========================================
 const server = app.listen(PORT, () => {
   console.log(`\n======================================================`);
-  console.log(`🌍 EcoMonitor Backend Server listening on http://localhost:${PORT}`);
-  console.log(`======================================================`);
-  console.log(`📡 Ready Endpoints:`);
-  console.log(`   - GET  /health                -> Root heartbeat check`);
-  console.log(`   - GET  /api/health            -> API heartbeat check`);
-  console.log(`   - GET  /api/locations         -> Fetch locations with latest readings`);
-  console.log(`   - GET  /api/locations/:id     -> Fetch single location`);
-  console.log(`   - GET  /api/locations/:id/history -> Fetch trend chart data`);
-  console.log(`   - POST /api/mock-sensor       -> Ingest mock IoT sensor data`);
+  console.log(`🌍 EcoMonitor Backend Server running on http://localhost:${PORT}`);
+  console.log(`📡 JavaScript & Express Engine Active`);
   console.log(`======================================================\n`);
 });
 
-// Graceful process termination handling
 process.on('SIGINT', async () => {
   console.log('\nGracefully shutting down server...');
   await prisma.$disconnect();
@@ -485,3 +470,5 @@ process.on('SIGINT', async () => {
     process.exit(0);
   });
 });
+
+module.exports = { app, prisma };

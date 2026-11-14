@@ -6,7 +6,7 @@
     "dev": "npm --prefix backend run dev",
     "dev:backend": "npm --prefix backend run dev",
     "dev:mobile": "npm --prefix mobile start",
-    "build:backend": "npm --prefix backend run build",
+    "seed": "npm --prefix backend run seed",
     "start": "npm --prefix backend start"
   }
 }

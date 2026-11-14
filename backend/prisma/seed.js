@@ -1,10 +1,10 @@
-import { PrismaClient } from '@prisma/client';
-import { calculateAQI, calculateWQI } from '../src/utils/calculators';
+const { PrismaClient } = require('@prisma/client');
+const { calculateAQI, calculateWQI } = require('../src/utils/calculators');
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('\n🌱 Starting database seeding for EcoMonitor...');
+  console.log('\n🌱 Starting database seeding for EcoMonitor (JavaScript)...');
 
   // Reset database state for repeatable, clean runs
   await prisma.waterReading.deleteMany();
@@ -154,3 +154,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

@@ -1,19 +1,19 @@
 {
   "name": "ecotrack-backend",
   "version": "1.0.0",
-  "description": "EcoMonitor Backend REST API using Express, TypeScript, and Prisma ORM",
-  "main": "dist/src/server.js",
+  "description": "EcoMonitor Backend REST API using Express and Prisma ORM (JavaScript)",
+  "main": "server.js",
   "scripts": {
-    "dev": "nodemon src/server.ts",
-    "build": "tsc",
-    "start": "node dist/src/server.js",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "seed": "node prisma/seed.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "seed": "ts-node prisma/seed.ts"
+    "test:math": "node src/utils/test-calculators.js"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^6.3.0",
@@ -22,13 +22,7 @@
     "express": "^4.21.2"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.13.0",
     "nodemon": "^3.1.9",
-    "prisma": "^6.3.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "prisma": "^6.3.0"
   }
 }
-
