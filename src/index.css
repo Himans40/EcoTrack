@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply dark:bg-slate-950 dark:text-slate-100;
+  }
+
+  /* A visible, consistent focus ring for keyboard users on every control. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2;
+    @apply ring-offset-slate-50 dark:ring-offset-slate-950;
+  }
+
+  /* Respect users who have asked for less motion. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Dashboard card surface, used across every page. */
+  .card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+    @apply dark:border-slate-800 dark:bg-slate-900;
+  }
+
+  .card-header {
+    @apply flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 px-5 py-4;
+    @apply dark:border-slate-800;
+  }
+
+  .card-title {
+    @apply text-sm font-semibold uppercase tracking-wide text-slate-500;
+    @apply dark:text-slate-400;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300;
+  }
+
+  .field-input {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900;
+    @apply placeholder:text-slate-400;
+    @apply focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30;
+    @apply disabled:cursor-not-allowed disabled:bg-slate-100;
+    @apply dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500;
+    @apply dark:disabled:bg-slate-800;
+  }
+
+  .field-error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500/30;
+    @apply dark:border-red-500;
+  }
+
+  .table-cell {
+    @apply whitespace-nowrap px-4 py-3 text-sm text-slate-700 dark:text-slate-300;
+  }
+
+  .table-head {
+    @apply whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500;
+    @apply dark:text-slate-400;
+  }
+
+  .prose-section h3 {
+    @apply mb-2 mt-6 text-base font-semibold text-slate-900 dark:text-slate-100;
+  }
+
+  .prose-section p {
+    @apply mb-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300;
+  }
+
+  .prose-section ul {
+    @apply mb-3 ml-5 list-disc space-y-1.5 text-sm leading-relaxed text-slate-600;
+    @apply dark:text-slate-300;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Leaflet overrides
+   The map ships its own light-themed chrome; these keep its controls and
+   popups legible when the application is in dark mode.
+   -------------------------------------------------------------------------- */
+.leaflet-container {
+  @apply bg-slate-200 font-sans dark:bg-slate-800;
+}
+
+.dark .leaflet-popup-content-wrapper,
+.dark .leaflet-popup-tip {
+  @apply bg-slate-900 text-slate-100;
+}
+
+.dark .leaflet-bar a,
+.dark .leaflet-control-attribution {
+  @apply bg-slate-900 text-slate-200;
+}
+
+.dark .leaflet-bar a:hover {
+  @apply bg-slate-800;
+}
+
+.dark .leaflet-control-attribution a {
+  @apply text-brand-400;
+}
