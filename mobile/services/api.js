@@ -76,3 +76,4 @@ export async function postMockSensorData(payload) {
     body: JSON.stringify(payload),
   });
 }
+
