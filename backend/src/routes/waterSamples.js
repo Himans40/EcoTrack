@@ -91,6 +91,35 @@ function toJson(row) {
   return json;
 }
 
+/** Average of a list of numbers, rounded to 2 decimals; null for an empty list. */
+function average(values) {
+  if (values.length === 0) return null;
+  const total = values.reduce((sum, value) => sum + value, 0);
+  return Math.round((total / values.length) * 100) / 100;
+}
+
+/** Count, averages and per-source breakdown for a list of sample rows. */
+function summariseSamples(rows) {
+  const bySourceType = {};
+  for (const row of rows) {
+    bySourceType[row.sourceType] = (bySourceType[row.sourceType] || 0) + 1;
+  }
+  return {
+    total: rows.length,
+    demo: rows.filter((row) => row.isDemo).length,
+    latestSampledAt: rows.length > 0 ? rows[0].sampledAt.toISOString() : null,
+    averages: {
+      ph: average(rows.map((row) => row.ph)),
+      turbidity: average(rows.map((row) => row.turbidity)),
+      dissolvedOxygen: average(rows.map((row) => row.dissolvedOxygen)),
+      tds: average(rows.map((row) => row.tds)),
+      temperature: average(rows.map((row) => row.temperature)),
+      conductivity: average(rows.map((row) => row.conductivity)),
+    },
+    bySourceType,
+  };
+}
+
 function waterSamplesRouter(prisma) {
   const router = express.Router();
 
@@ -98,6 +127,17 @@ function waterSamplesRouter(prisma) {
     try {
       const rows = await prisma.waterSample.findMany({ orderBy: { sampledAt: 'desc' } });
       res.json({ success: true, count: rows.length, data: rows.map(toJson) });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // GET /api/water-samples/stats -> totals and averages across all samples.
+  // Declared before '/:id' so "stats" is not mistaken for a sample id.
+  router.get('/stats', async (req, res, next) => {
+    try {
+      const rows = await prisma.waterSample.findMany({ orderBy: { sampledAt: 'desc' } });
+      res.json({ success: true, data: summariseSamples(rows) });
     } catch (error) {
       next(error);
     }
@@ -157,4 +197,4 @@ function waterSamplesRouter(prisma) {
   return router;
 }
 
-module.exports = { waterSamplesRouter, validateSample };
+module.exports = { waterSamplesRouter, validateSample, summariseSamples };

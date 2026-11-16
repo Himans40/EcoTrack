@@ -121,6 +121,15 @@ test('GET lists samples newest first', async () => {
   assert.deepEqual(body.data.map((row) => row.id), ['t-2', 't-1']);
 });
 
+test('GET /stats summarises the stored samples', async () => {
+  const body = await (await call('GET', '/api/water-samples/stats')).json();
+  assert.equal(body.data.total, 2);
+  assert.equal(body.data.bySourceType.lake, 2);
+  assert.equal(body.data.latestSampledAt, '2026-11-12T08:00:00.000Z');
+  // t-1 has pH 8.1 after its update, t-2 has 7.2.
+  assert.equal(body.data.averages.ph, 7.65);
+});
+
 test('DELETE ?demo=true removes only demonstration samples', async () => {
   await call('PUT', '/api/water-samples/t-demo', sample({ isDemo: true }));
   const response = await call('DELETE', '/api/water-samples?demo=true');
