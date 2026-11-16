@@ -20,7 +20,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { WaterMeasurement, WaterMeasurementInput } from '@/types'
+import type { SyncStatus, WaterMeasurement, WaterMeasurementInput } from '@/types'
 import { isWaterMeasurement } from '@/lib/guards'
 import { isArrayOf, readStorage, STORAGE_KEYS, writeStorage } from '@/lib/storage'
 import { createId } from '@/lib/id'
@@ -33,9 +33,6 @@ import {
   mergeWaterSamples,
   saveWaterSample,
 } from '@/services/backend'
-
-/** Whether records are currently being mirrored to the backend. */
-export type SyncStatus = 'connecting' | 'synced' | 'local-only'
 
 interface WaterContextValue {
   /** All records, newest sample first. */

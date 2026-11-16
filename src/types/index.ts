@@ -233,6 +233,9 @@ export interface WaterQualityAssessment {
   concerns: WaterParameterAssessment[]
 }
 
+/** Whether water records are currently being mirrored to the backend. */
+export type SyncStatus = 'connecting' | 'synced' | 'local-only'
+
 /* -------------------------------------------------------------------------- */
 /*  Settings                                                                  */
 /* -------------------------------------------------------------------------- */

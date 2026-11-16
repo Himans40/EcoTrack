@@ -33,6 +33,7 @@ import {
   CardHeader,
   DisclaimerNote,
   EmptyState,
+  SyncIndicator,
 } from '@/components/ui'
 import {
   assessWaterMeasurement,
@@ -68,6 +69,7 @@ export default function WaterQualityPage() {
     loadDemoMeasurements,
     hasDemoMeasurements,
     clearDemoMeasurements,
+    syncStatus,
   } = useWaterMeasurements()
   const { activeLocation } = useLocations()
 
@@ -148,6 +150,7 @@ export default function WaterQualityPage() {
         description="Record water samples manually, score them against published general guidance, track them over time and export them as CSV."
         actions={
           <>
+            <SyncIndicator status={syncStatus} />
             <Button variant="primary" onClick={openCreateForm}>
               <Plus className="h-4 w-4" aria-hidden />
               Add measurement

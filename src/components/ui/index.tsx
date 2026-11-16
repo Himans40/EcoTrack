@@ -7,7 +7,7 @@
 
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 import { AlertTriangle, Database, FlaskConical, Loader2, Radio, RefreshCw } from 'lucide-react'
-import type { DataOrigin, DataProvenance } from '@/types'
+import type { DataOrigin, DataProvenance, SyncStatus } from '@/types'
 import { formatDateTime, formatRelativeTime } from '@/lib/format'
 
 /* -------------------------------------------------------------------------- */
@@ -414,5 +414,41 @@ export function DisclaimerNote({
       <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
       <span>{children}</span>
     </p>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Backend sync status                                                       */
+/* -------------------------------------------------------------------------- */
+
+const SYNC_COPY: Record<SyncStatus, { label: string; title: string; dot: string }> = {
+  connecting: {
+    label: 'Connecting to server',
+    title: 'Checking whether the EcoTrack backend is running.',
+    dot: 'bg-slate-400 animate-pulse',
+  },
+  synced: {
+    label: 'Saved to server',
+    title: 'Records are stored in this browser and in the EcoTrack backend database.',
+    dot: 'bg-brand-500',
+  },
+  'local-only': {
+    label: 'Saved in this browser',
+    title: 'The backend is not running, so records are kept in this browser only. Start it with `npm start`.',
+    dot: 'bg-amber-500',
+  },
+}
+
+/** Small indicator saying where water records are currently being saved. */
+export function SyncIndicator({ status }: { status: SyncStatus }) {
+  const copy = SYNC_COPY[status]
+  return (
+    <span
+      title={copy.title}
+      className="inline-flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${copy.dot}`} aria-hidden />
+      {copy.label}
+    </span>
   )
 }
