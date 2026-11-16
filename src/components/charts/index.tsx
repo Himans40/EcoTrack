@@ -39,7 +39,7 @@ function useTooltipProps() {
       borderRadius: '0.5rem',
       fontSize: '0.75rem',
       color: theme.tooltipText,
-      boxShadow: '0 4px 12px rgb(0 0 0 / 0.08)',
+      boxShadow: 'none',
     },
     labelStyle: { color: theme.tooltipText, fontWeight: 600, marginBottom: 2 },
     itemStyle: { color: theme.tooltipText },
@@ -90,11 +90,11 @@ export function AqiTrendChart({
       <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
         <defs>
           <linearGradient id="aqiFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#1caa6b" stopOpacity={0.45} />
-            <stop offset="100%" stopColor="#1caa6b" stopOpacity={0.03} />
+            <stop offset="0%" stopColor={theme.accent} stopOpacity={0.28} />
+            <stop offset="100%" stopColor={theme.accent} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid stroke={theme.grid} strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid stroke={theme.grid} vertical={false} />
         <XAxis
           dataKey="time"
           tickFormatter={formatHour}
@@ -132,8 +132,8 @@ export function AqiTrendChart({
           type="monotone"
           dataKey="usAqi"
           name="US AQI"
-          stroke="#108855"
-          strokeWidth={2}
+          stroke={theme.accent}
+          strokeWidth={1.75}
           fill="url(#aqiFill)"
           dot={false}
           activeDot={{ r: 4 }}
@@ -149,12 +149,12 @@ export function AqiTrendChart({
 /* -------------------------------------------------------------------------- */
 
 const POLLUTANT_COLORS: Record<string, string> = {
-  pm2_5: '#dc2626',
-  pm10: '#ea580c',
-  ozone: '#2576eb',
-  nitrogen_dioxide: '#7e22ce',
-  sulphur_dioxide: '#ca8a04',
-  carbon_monoxide: '#0f766e',
+  pm2_5: '#b4432f',
+  pm10: '#c98a2b',
+  ozone: '#3a76a8',
+  nitrogen_dioxide: '#6d5a9e',
+  sulphur_dioxide: '#8a9a2c',
+  carbon_monoxide: '#2f7a62',
 }
 
 /** One or more pollutant concentration series on a shared axis. */
@@ -182,7 +182,7 @@ export function PollutantTrendChart({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
-        <CartesianGrid stroke={theme.grid} strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid stroke={theme.grid} vertical={false} />
         <XAxis
           dataKey="time"
           tickFormatter={formatHour}
@@ -249,7 +249,7 @@ export function WeatherTrendChart({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
-        <CartesianGrid stroke={theme.grid} strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid stroke={theme.grid} vertical={false} />
         <XAxis
           dataKey="time"
           tickFormatter={formatHour}
@@ -278,7 +278,7 @@ export function WeatherTrendChart({
           type="monotone"
           dataKey="temperatureC"
           name="Temperature (°C)"
-          stroke="#ea580c"
+          stroke="#c98a2b"
           strokeWidth={2}
           dot={false}
           connectNulls
@@ -288,7 +288,7 @@ export function WeatherTrendChart({
           type="monotone"
           dataKey="relativeHumidity"
           name="Humidity (%)"
-          stroke="#2576eb"
+          stroke="#3a76a8"
           strokeWidth={2}
           strokeDasharray="4 3"
           dot={false}
@@ -304,13 +304,13 @@ export function WeatherTrendChart({
 /* -------------------------------------------------------------------------- */
 
 const WATER_COLORS: Record<string, string> = {
-  ph: '#7e22ce',
-  turbidity: '#a16207',
-  dissolvedOxygen: '#0f766e',
-  tds: '#2576eb',
-  conductivity: '#be123c',
-  temperature: '#ea580c',
-  score: '#108855',
+  ph: '#6d5a9e',
+  turbidity: '#a8742a',
+  dissolvedOxygen: '#2f7a62',
+  tds: '#3a76a8',
+  conductivity: '#b4432f',
+  temperature: '#c98a2b',
+  score: '#1f5e4e',
 }
 
 type WaterSeriesKey = keyof typeof WATER_COLORS
@@ -396,7 +396,7 @@ export function WaterTrendChart({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -18 }}>
-        <CartesianGrid stroke={theme.grid} strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid stroke={theme.grid} vertical={false} />
         <XAxis
           dataKey="sampledAt"
           tickFormatter={(value) => formatDate(String(value))}

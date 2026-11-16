@@ -95,7 +95,7 @@ export function AqiGauge({ aqi }: { aqi: number | null }) {
               y1={CENTER}
               x2={needle.x}
               y2={needle.y}
-              stroke={category?.hex ?? '#64748b'}
+              stroke={category?.hex ?? '#8f9c95'}
               strokeWidth={3}
               strokeLinecap="round"
             />
@@ -103,7 +103,7 @@ export function AqiGauge({ aqi }: { aqi: number | null }) {
               cx={CENTER}
               cy={CENTER}
               r={6}
-              fill={category?.hex ?? '#64748b'}
+              fill={category?.hex ?? '#8f9c95'}
             />
           </>
         ) : null}

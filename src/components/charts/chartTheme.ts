@@ -6,6 +6,8 @@ export interface ChartTheme {
   tooltipBg: string
   tooltipBorder: string
   tooltipText: string
+  /** Primary series colour, lifted in dark mode so it stays legible. */
+  accent: string
 }
 
 /**
@@ -21,5 +23,6 @@ export function useChartTheme(): ChartTheme {
     tooltipBg: isDark ? '#161d1a' : '#ffffff',
     tooltipBorder: isDark ? '#37423d' : '#d9dfdb',
     tooltipText: isDark ? '#e8ece9' : '#161d1a',
+    accent: isDark ? '#4f957c' : '#1f5e4e',
   }
 }
