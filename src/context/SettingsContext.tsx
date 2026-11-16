@@ -19,7 +19,7 @@ import { isAppSettings } from '@/lib/guards'
 import { readStorage, STORAGE_KEYS, writeStorage } from '@/lib/storage'
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  theme: 'system',
+  theme: 'light',
   temperatureUnit: 'celsius',
   refreshIntervalMinutes: 15,
   historyWindowHours: 72,

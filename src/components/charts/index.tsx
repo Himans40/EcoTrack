@@ -154,7 +154,7 @@ const POLLUTANT_COLORS: Record<string, string> = {
   ozone: '#3a76a8',
   nitrogen_dioxide: '#6d5a9e',
   sulphur_dioxide: '#8a9a2c',
-  carbon_monoxide: '#2f7a62',
+  carbon_monoxide: '#578873',
 }
 
 /** One or more pollutant concentration series on a shared axis. */
@@ -306,11 +306,11 @@ export function WeatherTrendChart({
 const WATER_COLORS: Record<string, string> = {
   ph: '#6d5a9e',
   turbidity: '#a8742a',
-  dissolvedOxygen: '#2f7a62',
+  dissolvedOxygen: '#578873',
   tds: '#3a76a8',
   conductivity: '#b4432f',
   temperature: '#c98a2b',
-  score: '#1f5e4e',
+  score: '#44705e',
 }
 
 type WaterSeriesKey = keyof typeof WATER_COLORS

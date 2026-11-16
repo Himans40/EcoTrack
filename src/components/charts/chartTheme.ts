@@ -18,11 +18,11 @@ export function useChartTheme(): ChartTheme {
   const { resolvedTheme } = useSettings()
   const isDark = resolvedTheme === 'dark'
   return {
-    grid: isDark ? '#222b27' : '#e8ece9',
-    axis: isDark ? '#8f9c95' : '#66736c',
-    tooltipBg: isDark ? '#161d1a' : '#ffffff',
-    tooltipBorder: isDark ? '#37423d' : '#d9dfdb',
-    tooltipText: isDark ? '#e8ece9' : '#161d1a',
-    accent: isDark ? '#4f957c' : '#1f5e4e',
+    grid: isDark ? '#28282c' : '#f0f0f2',
+    axis: isDark ? '#a3a3aa' : '#74747c',
+    tooltipBg: isDark ? '#18181b' : '#ffffff',
+    tooltipBorder: isDark ? '#3f3f45' : '#e9e9eb',
+    tooltipText: isDark ? '#f4f4f5' : '#18181b',
+    accent: isDark ? '#7aa48f' : '#44705e',
   }
 }

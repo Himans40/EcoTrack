@@ -28,14 +28,14 @@ export function AqiReading({
   locationName: string
 }) {
   const category = getAqiCategory(aqi)
-  const color = category?.hex ?? '#8f9c95'
+  const color = category?.hex ?? '#a3a3aa'
   const dominant = dominantPollutant ? POLLUTANT_META[dominantPollutant] : null
 
   return (
     <section
       aria-label="Current air quality reading"
       className="card overflow-hidden"
-      style={{ borderTopColor: color, borderTopWidth: 3 }}
+      style={{ borderTopColor: color, borderTopWidth: 2 }}
     >
       <div className="grid gap-8 p-5 sm:p-7 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-end">
         <div>
@@ -97,10 +97,10 @@ export function HourStrip({
             role="listitem"
             aria-label={label}
             title={label}
-            className="flex-1 rounded-[2px] transition-opacity hover:opacity-70"
+            className="flex-1 rounded-[2px] opacity-80 transition-opacity hover:opacity-100"
             style={{
               height: `${Math.max(4, (value / scaleTop) * 100)}%`,
-              backgroundColor: category?.hex ?? '#8f9c95',
+              backgroundColor: category?.hex ?? '#a3a3aa',
             }}
           />
         )

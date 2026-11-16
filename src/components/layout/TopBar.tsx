@@ -78,7 +78,7 @@ export function TopBar({
 
   return (
     <>
-      <header className="sticky top-0 z-30 print:hidden border-b border-slate-200 bg-slate-50/85 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/85">
+      <header className="sticky top-0 z-30 print:hidden border-b border-slate-200 bg-white/85 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/85">
         <div className="flex h-[60px] items-center gap-2 px-3 sm:px-5 lg:px-8">
           <button
             type="button"

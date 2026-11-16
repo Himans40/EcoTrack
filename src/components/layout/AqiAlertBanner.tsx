@@ -35,11 +35,7 @@ export function AqiAlertBanner() {
   return (
     <div
       role="alert"
-      className="border-b px-4 py-2.5 text-sm sm:px-6 lg:px-8 print:hidden"
-      style={{
-        backgroundColor: `${category?.hex}14`,
-        borderColor: `${category?.hex}40`,
-      }}
+      className="border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-sm sm:px-6 lg:px-8 print:hidden dark:border-slate-800 dark:bg-slate-900"
     >
       <div className="mx-auto flex max-w-[1400px] items-center gap-3">
         <BellRing className="h-4 w-4 shrink-0" style={{ color: category?.hex }} aria-hidden />

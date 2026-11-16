@@ -121,7 +121,7 @@ export default function SettingsPage() {
                     onClick={() => updateSettings({ theme: option.value })}
                     className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
                       isActive
-                        ? 'border-brand-600 bg-brand-600 text-white'
+                        ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900'
                         : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                   >

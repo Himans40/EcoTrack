@@ -21,7 +21,7 @@
   }
 
   ::selection {
-    @apply bg-brand-200 text-brand-950 dark:bg-brand-700 dark:text-white;
+    @apply bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-white;
   }
 
   h1,
@@ -198,7 +198,7 @@
    them into a dark map in dark mode. Only the tile layer is filtered, so the
    markers keep their true category colours. */
 .leaflet-tile-pane {
-  filter: saturate(0.45) contrast(0.95);
+  filter: grayscale(0.85) contrast(0.92) brightness(1.04);
 }
 
 .dark .leaflet-tile-pane {

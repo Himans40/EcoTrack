@@ -139,7 +139,7 @@ export function EnvironmentMap({
         <Marker
           position={[activeLocation.latitude, activeLocation.longitude]}
           icon={buildPinIcon(
-            activeCategory?.hex ?? '#8f9c95',
+            activeCategory?.hex ?? '#a3a3aa',
             activeAqi !== null ? String(Math.round(activeAqi)) : '?',
             true,
           )}
@@ -179,7 +179,7 @@ export function EnvironmentMap({
               key={location.id}
               position={[location.latitude, location.longitude]}
               icon={buildPinIcon(
-                category?.hex ?? '#8f9c95',
+                category?.hex ?? '#a3a3aa',
                 aqi !== null ? String(Math.round(aqi)) : '•',
                 false,
               )}
@@ -201,7 +201,7 @@ export function EnvironmentMap({
                     padding: '0.25rem 0.6rem',
                     borderRadius: '0.375rem',
                     border: 'none',
-                    background: '#1f5e4e',
+                    background: '#18181b',
                     color: '#fff',
                     fontSize: '0.7rem',
                     fontWeight: 600,

@@ -70,7 +70,7 @@ type ButtonSize = 'sm' | 'md'
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 dark:bg-brand-500 dark:hover:bg-brand-400 dark:text-brand-950',
+    'bg-slate-900 text-white hover:bg-slate-700 active:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200',
   secondary:
     'border border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800',
   ghost:
@@ -294,18 +294,20 @@ export function ErrorState({
 
 const ORIGIN_CONFIG: Record<
   DataOrigin,
-  { label: string; className: string; icon: typeof Radio }
+  { label: string; className: string; iconClass?: string; icon: typeof Radio }
 > = {
   api: {
     label: 'Live API data',
     className:
-      'bg-emerald-100 text-emerald-800 ring-emerald-600/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/30',
+      'bg-slate-50 text-slate-600 ring-slate-200 dark:bg-slate-800/60 dark:text-slate-300 dark:ring-slate-700',
+    iconClass: 'text-brand-600 dark:text-brand-400',
     icon: Radio,
   },
   user: {
     label: 'Your recorded data',
     className:
-      'bg-water-100 text-water-800 ring-water-600/30 dark:bg-water-500/15 dark:text-water-300 dark:ring-water-400/30',
+      'bg-slate-50 text-slate-600 ring-slate-200 dark:bg-slate-800/60 dark:text-slate-300 dark:ring-slate-700',
+    iconClass: 'text-water-600 dark:text-water-400',
     icon: Database,
   },
   demo: {
@@ -328,7 +330,7 @@ export function OriginBadge({
   const Icon = config.icon
   return (
     <Badge className={`${config.className} ${className}`}>
-      <Icon className="h-3 w-3" aria-hidden />
+      <Icon className={`h-3 w-3 ${config.iconClass ?? ''}`} aria-hidden />
       {config.label}
     </Badge>
   )

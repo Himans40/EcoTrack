@@ -5,18 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Neutral scale with a faint green-grey cast, like weathered survey
-        // paper. Overrides Tailwind's slate so every surface picks it up.
+        // Quiet neutral greys on white. Overrides Tailwind's slate so every
+        // surface in the app picks it up.
         slate: {
-          50: '#f3f5f4', 100: '#e8ece9', 200: '#d9dfdb', 300: '#bcc6c0',
-          400: '#8f9c95', 500: '#66736c', 600: '#4b5752', 700: '#37423d',
-          800: '#222b27', 900: '#161d1a', 950: '#0d1311',
+          50: '#fafafa', 100: '#f4f4f5', 200: '#e9e9eb', 300: '#d6d6da',
+          400: '#a3a3aa', 500: '#74747c', 600: '#55555c', 700: '#3f3f45',
+          800: '#28282c', 900: '#18181b', 950: '#0f0f11',
         },
-        // Spruce — the instrument's primary accent.
+        // Muted sage — used sparingly for active states and small accents.
         brand: {
-          50: '#eef6f2', 100: '#d5e9e0', 200: '#acd3c2', 300: '#7bb69e',
-          400: '#4f957c', 500: '#2f7a62', 600: '#1f5e4e', 700: '#1a4c40',
-          800: '#173d34', 900: '#13322b', 950: '#0a1c18',
+          50: '#f4f8f6', 100: '#e6efea', 200: '#cbdcd3', 300: '#a6c3b4',
+          400: '#7aa48f', 500: '#578873', 600: '#44705e', 700: '#385c4d',
+          800: '#2e4a3f', 900: '#263d34', 950: '#13211c',
         },
         // Estuary — reserved for anything water.
         water: {

@@ -274,7 +274,7 @@ export const WATER_RATINGS: RatingDefinition[] = [
     min: 85,
     colorClass:
       'bg-emerald-100 text-emerald-800 ring-emerald-600/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/30',
-    hex: '#2f7a62',
+    hex: '#578873',
   },
   {
     rating: 'good',
