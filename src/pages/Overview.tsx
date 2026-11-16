@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom'
 import {
   ArrowRight,
   Droplets,
-  Gauge,
   MapPin,
   Thermometer,
   Waves,
@@ -17,6 +16,7 @@ import { useLocations } from '@/context/LocationContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useWaterMeasurements } from '@/context/WaterContext'
 import { AqiAdvice, AqiGauge, AqiScaleStrip } from '@/components/air'
+import { AqiReading } from '@/components/air/AqiReading'
 import { AqiTrendChart } from '@/components/charts'
 import { PageHeader, StatCard } from '@/components/StatCard'
 import {
@@ -102,30 +102,28 @@ export default function OverviewPage() {
         </Card>
       ) : null}
 
+      {/* Headline reading */}
+      {isLoading ? (
+        <SkeletonBlock className="h-64" />
+      ) : airQuality ? (
+        <AqiReading
+          aqi={airQuality.current.usAqi}
+          dominantPollutant={airQuality.current.dominantPollutant}
+          hourly={airQuality.hourly}
+          locationName={activeLocation.name}
+        />
+      ) : null}
+
       {/* Metric tiles */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-3">
         {isLoading ? (
           <>
-            <SkeletonBlock className="h-32" />
             <SkeletonBlock className="h-32" />
             <SkeletonBlock className="h-32" />
             <SkeletonBlock className="h-32" />
           </>
         ) : (
           <>
-            <StatCard
-              label="Air Quality Index"
-              value={
-                airQuality?.current.usAqi !== null &&
-                airQuality?.current.usAqi !== undefined
-                  ? Math.round(airQuality.current.usAqi)
-                  : '—'
-              }
-              unit="US AQI"
-              icon={<Gauge className="h-4 w-4" aria-hidden />}
-              footer={airQuality?.current.category?.label ?? 'Unavailable'}
-              origin={airQuality?.provenance.origin}
-            />
             <StatCard
               label="Temperature"
               value={formatTemperature(
