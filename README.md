@@ -513,6 +513,7 @@ These are real constraints of the project, stated honestly.
 | Document | Contents |
 | --- | --- |
 | [`docs/PROJECT_REPORT.md`](docs/PROJECT_REPORT.md) | Full project report: abstract, literature background, requirements, design, implementation, testing methodology, verified results, conclusion |
+| [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md) | Every file and function explained in plain language, plus likely viva questions |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Component structure, data flow, API request lifecycle, persistence, chart implementation |
 | [`docs/DEMO_GUIDE.md`](docs/DEMO_GUIDE.md) | Five-minute demonstration walkthrough and likely viva questions with answers |
 | [`GITHUB_UPLOAD_GUIDE.md`](GITHUB_UPLOAD_GUIDE.md) | Beginner-friendly guide to running the project and uploading it to GitHub |
