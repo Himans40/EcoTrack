@@ -250,6 +250,8 @@ export interface AppSettings {
   refreshIntervalMinutes: number
   /** Hours of air-quality history to request and chart. */
   historyWindowHours: number
+  /** Show an alert when the AQI goes above this value; 0 turns alerts off. */
+  aqiAlertThreshold: number
 }
 
 /* -------------------------------------------------------------------------- */

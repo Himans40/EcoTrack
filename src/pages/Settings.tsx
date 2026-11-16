@@ -20,6 +20,7 @@ import {
 import type { TemperatureUnit, ThemeMode } from '@/types'
 import {
   DEFAULT_SETTINGS,
+  AQI_ALERT_OPTIONS,
   HISTORY_WINDOW_OPTIONS,
   REFRESH_INTERVAL_OPTIONS,
   useSettings,
@@ -225,6 +226,30 @@ export default function SettingsPage() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label htmlFor="aqi-alert" className="field-label">
+                Air quality alert
+              </label>
+              <select
+                id="aqi-alert"
+                value={settings.aqiAlertThreshold}
+                onChange={(event) =>
+                  updateSettings({ aqiAlertThreshold: Number(event.target.value) })
+                }
+                className="field-input"
+              >
+                {AQI_ALERT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                A banner appears at the top of every page while the AQI for the active
+                city is above this value.
+              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 border-t border-slate-200 pt-4 dark:border-slate-800">

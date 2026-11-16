@@ -23,6 +23,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   temperatureUnit: 'celsius',
   refreshIntervalMinutes: 15,
   historyWindowHours: 72,
+  aqiAlertThreshold: 150,
 }
 
 /** Options offered in Settings for the auto-refresh control. */
@@ -32,6 +33,15 @@ export const REFRESH_INTERVAL_OPTIONS = [
   { value: 15, label: 'Every 15 minutes' },
   { value: 30, label: 'Every 30 minutes' },
   { value: 60, label: 'Every hour' },
+] as const
+
+/** Options offered for the AQI alert. Values are EPA category boundaries. */
+export const AQI_ALERT_OPTIONS = [
+  { value: 0, label: 'Off' },
+  { value: 50, label: 'Above 50 (worse than Good)' },
+  { value: 100, label: 'Above 100 (unhealthy for sensitive groups)' },
+  { value: 150, label: 'Above 150 (unhealthy for everyone)' },
+  { value: 200, label: 'Above 200 (very unhealthy)' },
 ] as const
 
 /** Options offered for the chart history window. */
@@ -64,9 +74,12 @@ function resolveTheme(mode: ThemeMode, systemDark: boolean): 'light' | 'dark' {
 }
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<AppSettings>(() =>
-    readStorage(STORAGE_KEYS.settings, DEFAULT_SETTINGS, isAppSettings),
-  )
+  // Spread over the defaults so settings saved by an older version still get
+  // any fields added since (such as the AQI alert threshold).
+  const [settings, setSettings] = useState<AppSettings>(() => ({
+    ...DEFAULT_SETTINGS,
+    ...readStorage(STORAGE_KEYS.settings, DEFAULT_SETTINGS, isAppSettings),
+  }))
   const [systemDark, setSystemDark] = useState<boolean>(prefersDark)
 
   // Track the OS preference so 'system' stays live rather than snapshotting.
