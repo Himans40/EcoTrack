@@ -35,7 +35,7 @@ export function AqiAlertBanner() {
   return (
     <div
       role="alert"
-      className="border-b px-4 py-2.5 text-sm sm:px-6 lg:px-8"
+      className="border-b px-4 py-2.5 text-sm sm:px-6 lg:px-8 print:hidden"
       style={{
         backgroundColor: `${category?.hex}14`,
         borderColor: `${category?.hex}40`,

@@ -22,6 +22,7 @@ import WaterQualityPage from '@/pages/WaterQuality'
 import EnvironmentMapPage from '@/pages/EnvironmentMapPage'
 import AnalyticsPage from '@/pages/Analytics'
 import ComparePage from '@/pages/Compare'
+import ReportPage from '@/pages/Report'
 import EducationPage from '@/pages/Education'
 import SettingsPage from '@/pages/Settings'
 import NotFoundPage from '@/pages/NotFound'
@@ -43,6 +44,7 @@ export default function App() {
                       <Route path="/map" element={<EnvironmentMapPage />} />
                       <Route path="/analytics" element={<AnalyticsPage />} />
                       <Route path="/compare" element={<ComparePage />} />
+                      <Route path="/report" element={<ReportPage />} />
                       <Route path="/learn" element={<EducationPage />} />
                       <Route path="/settings" element={<SettingsPage />} />
                       {/* Legacy/alternate paths kept working rather than 404ing. */}

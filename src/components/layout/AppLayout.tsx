@@ -29,7 +29,7 @@ export function AppLayout() {
         <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <Outlet />
         </main>
-        <footer className="border-t border-slate-200 px-5 py-4 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+        <footer className="print:hidden border-t border-slate-200 px-5 py-4 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
           <p>
             Air and Water Quality Index and Environment Monitoring System · Air data
             from Open-Meteo, map tiles from OpenStreetMap contributors. Water quality

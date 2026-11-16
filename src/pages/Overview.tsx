@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Droplets,
   MapPin,
+  Printer,
   Thermometer,
   Waves,
 } from 'lucide-react'
@@ -85,10 +86,18 @@ export default function OverviewPage() {
           </>
         }
         actions={
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-            <MapPin className="h-3.5 w-3.5" aria-hidden />
-            {formatCoordinates(activeLocation.latitude, activeLocation.longitude)}
-          </span>
+          <>
+            <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+              <MapPin className="h-3.5 w-3.5" aria-hidden />
+              {formatCoordinates(activeLocation.latitude, activeLocation.longitude)}
+            </span>
+            <Link to="/report">
+              <Button size="sm">
+                <Printer className="h-3.5 w-3.5" aria-hidden />
+                Report
+              </Button>
+            </Link>
+          </>
         }
       />
 

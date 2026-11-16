@@ -181,3 +181,15 @@
 .toast-in {
   animation: toast-in 180ms ease-out;
 }
+
+/* Printing always uses the light palette on white paper. */
+@media print {
+  html {
+    color-scheme: light;
+  }
+
+  body,
+  main {
+    background: #ffffff !important;
+  }
+}

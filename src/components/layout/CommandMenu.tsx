@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CornerDownLeft, MapPin, Monitor, Moon, RefreshCw, Search, Sun } from 'lucide-react'
+import { CornerDownLeft, MapPin, Monitor, Moon, Printer, RefreshCw, Search, Sun } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useLocations } from '@/context/LocationContext'
 import { useSettings } from '@/context/SettingsContext'
@@ -72,6 +72,7 @@ export function CommandMenu({ onClose }: { onClose: () => void }) {
 
     const actions: Command[] = [
       { id: 'action-refresh', label: 'Refresh data', group: 'Actions', icon: RefreshCw, run: refresh },
+      { id: 'action-report', label: 'Open printable report', group: 'Actions', icon: Printer, run: () => navigate('/report') },
       { id: 'theme-light', label: 'Use light theme', group: 'Actions', icon: Sun, run: () => updateSettings({ theme: 'light' }) },
       { id: 'theme-dark', label: 'Use dark theme', group: 'Actions', icon: Moon, run: () => updateSettings({ theme: 'dark' }) },
       { id: 'theme-system', label: 'Use system theme', group: 'Actions', icon: Monitor, run: () => updateSettings({ theme: 'system' }) },

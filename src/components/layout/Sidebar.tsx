@@ -75,7 +75,7 @@ function Wordmark() {
 /** Fixed sidebar, visible from the `lg` breakpoint upward. */
 export function Sidebar() {
   return (
-    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-slate-200 bg-white lg:flex lg:flex-col dark:border-slate-800 dark:bg-slate-900">
+    <aside className="sticky top-0 hidden h-screen print:!hidden w-60 shrink-0 border-r border-slate-200 bg-white lg:flex lg:flex-col dark:border-slate-800 dark:bg-slate-900">
       <div className="flex h-[61px] items-center px-5">
         <Wordmark />
       </div>
