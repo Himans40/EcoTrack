@@ -16,10 +16,10 @@ export function useChartTheme(): ChartTheme {
   const { resolvedTheme } = useSettings()
   const isDark = resolvedTheme === 'dark'
   return {
-    grid: isDark ? '#1e293b' : '#e2e8f0',
-    axis: isDark ? '#94a3b8' : '#64748b',
-    tooltipBg: isDark ? '#0f172a' : '#ffffff',
-    tooltipBorder: isDark ? '#334155' : '#e2e8f0',
-    tooltipText: isDark ? '#e2e8f0' : '#0f172a',
+    grid: isDark ? '#222b27' : '#e8ece9',
+    axis: isDark ? '#8f9c95' : '#66736c',
+    tooltipBg: isDark ? '#161d1a' : '#ffffff',
+    tooltipBorder: isDark ? '#37423d' : '#d9dfdb',
+    tooltipText: isDark ? '#e8ece9' : '#161d1a',
   }
 }
