@@ -274,7 +274,7 @@ export const WATER_RATINGS: RatingDefinition[] = [
     min: 85,
     colorClass:
       'bg-emerald-100 text-emerald-800 ring-emerald-600/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/30',
-    hex: '#16a34a',
+    hex: '#2f7a62',
   },
   {
     rating: 'good',
@@ -282,7 +282,7 @@ export const WATER_RATINGS: RatingDefinition[] = [
     min: 70,
     colorClass:
       'bg-water-100 text-water-800 ring-water-600/30 dark:bg-water-500/15 dark:text-water-300 dark:ring-water-400/30',
-    hex: '#2576eb',
+    hex: '#3a76a8',
   },
   {
     rating: 'fair',
@@ -290,7 +290,7 @@ export const WATER_RATINGS: RatingDefinition[] = [
     min: 50,
     colorClass:
       'bg-amber-100 text-amber-800 ring-amber-600/30 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/30',
-    hex: '#ca8a04',
+    hex: '#c98a2b',
   },
   {
     rating: 'poor',
@@ -298,7 +298,7 @@ export const WATER_RATINGS: RatingDefinition[] = [
     min: 30,
     colorClass:
       'bg-orange-100 text-orange-800 ring-orange-600/30 dark:bg-orange-500/15 dark:text-orange-300 dark:ring-orange-400/30',
-    hex: '#ea580c',
+    hex: '#c2622d',
   },
   {
     rating: 'very-poor',
@@ -306,7 +306,7 @@ export const WATER_RATINGS: RatingDefinition[] = [
     min: 0,
     colorClass:
       'bg-red-100 text-red-800 ring-red-600/30 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-400/30',
-    hex: '#dc2626',
+    hex: '#b4432f',
   },
 ]
 

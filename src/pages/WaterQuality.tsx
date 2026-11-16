@@ -40,6 +40,7 @@ import {
   assessWaterMeasurement,
   averageWaterScore,
   describeMeasurementOrigin,
+  getWaterRating,
   WATER_PARAMETERS,
   WATER_PARAMETER_KEYS,
   WATER_SAFETY_DISCLAIMER,
@@ -384,12 +385,7 @@ export default function WaterQualityPage() {
                                 className="h-full rounded-full"
                                 style={{
                                   width: `${parameter.subScore}%`,
-                                  backgroundColor:
-                                    parameter.subScore >= 70
-                                      ? '#16a34a'
-                                      : parameter.subScore >= 50
-                                        ? '#ca8a04'
-                                        : '#dc2626',
+                                  backgroundColor: getWaterRating(parameter.subScore).hex,
                                 }}
                               />
                             </div>

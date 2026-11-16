@@ -15,6 +15,7 @@ import type {
   WaterSourceType,
 } from '@/types'
 import {
+  assessWaterMeasurement,
   WATER_PARAMETER_KEYS,
   WATER_PARAMETERS,
   WATER_SOURCE_LABELS,
@@ -83,6 +84,22 @@ function buildInitialValues(measurement?: WaterMeasurement): FormValues {
 }
 
 type Errors = Partial<Record<keyof FormValues, string>>
+
+/**
+ * Score the sample while it is being typed. Returns null until all six
+ * parameters hold numbers inside their allowed ranges.
+ */
+export function previewScore(values: FormValues) {
+  const sample: Partial<Record<WaterParameterKey, number>> = {}
+  for (const key of WATER_PARAMETER_KEYS) {
+    const text = values[key].trim()
+    const number = Number(text)
+    const { min, max } = WATER_PARAMETERS[key]
+    if (text === '' || !Number.isFinite(number) || number < min || number > max) return null
+    sample[key] = number
+  }
+  return assessWaterMeasurement(sample as WaterMeasurement)
+}
 
 export function WaterMeasurementForm({
   measurement,
@@ -339,6 +356,8 @@ export function WaterMeasurementForm({
         />
       </fieldset>
 
+      <ScorePreview values={values} />
+
       <DisclaimerNote>
         These values are recorded as your own manual measurements. The application
         stores them locally in this browser and never describes them as live sensor
@@ -362,5 +381,35 @@ export function WaterMeasurementForm({
         </Button>
       </div>
     </form>
+  )
+}
+
+/** Live composite score shown under the parameter fields. */
+function ScorePreview({ values }: { values: FormValues }) {
+  const assessment = previewScore(values)
+  return (
+    <div
+      aria-live="polite"
+      className="flex items-center gap-4 rounded-lg border border-dashed border-slate-300 px-4 py-3 dark:border-slate-700"
+    >
+      {assessment ? (
+        <>
+          <span className="text-3xl font-semibold leading-none" style={{ color: assessment.hex }}>
+            {assessment.score}
+          </span>
+          <span className="text-sm text-slate-600 dark:text-slate-300">
+            <span className="font-medium text-slate-900 dark:text-white">{assessment.label}</span>
+            {' — '}
+            {assessment.concerns.length === 0
+              ? 'every parameter is inside its acceptable range.'
+              : `${assessment.concerns.length} parameter${assessment.concerns.length === 1 ? '' : 's'} outside the acceptable range.`}
+          </span>
+        </>
+      ) : (
+        <span className="text-sm text-slate-500 dark:text-slate-400">
+          The composite score appears here once all six parameters are filled in.
+        </span>
+      )}
+    </div>
   )
 }
