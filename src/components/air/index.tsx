@@ -134,7 +134,7 @@ export function AqiGauge({ aqi }: { aqi: number | null }) {
         >
           {aqi === null ? '—' : Math.round(aqi)}
         </span>
-        <span className="mt-1 text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <span className="mt-1 text-xs font-medium  text-slate-500 dark:text-slate-400">
           US AQI
         </span>
         {category ? (
@@ -211,9 +211,9 @@ export function PollutantCard({
 
   return (
     <div
-      className={`rounded-lg border p-4 transition-colors ${
+      className={`rounded-lg border p-4 ${
         isDominant
-          ? 'border-brand-300 bg-brand-50/60 dark:border-brand-500/40 dark:bg-brand-500/10'
+          ? 'border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-800/50'
           : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'
       }`}
     >
@@ -222,19 +222,19 @@ export function PollutantCard({
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             {meta.formula}
           </p>
-          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-            {meta.shortLabel}
+          <p className="truncate text-xs text-slate-500 dark:text-slate-400" title={meta.label}>
+            {meta.label}
           </p>
         </div>
         {isDominant ? (
-          <Badge className="bg-brand-100 text-brand-800 ring-brand-600/30 dark:bg-brand-500/20 dark:text-brand-300 dark:ring-brand-400/30">
+          <Badge className="bg-slate-900 text-white ring-transparent dark:bg-white dark:text-slate-900">
             Dominant
           </Badge>
         ) : null}
       </div>
 
       <p className="mt-3 flex items-baseline gap-1">
-        <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+        <span className="text-2xl font-medium tracking-tight text-slate-900 dark:text-slate-100">
           {formatNumber(reading.value, 1)}
         </span>
         <span className="text-xs text-slate-500 dark:text-slate-400">{meta.unit}</span>

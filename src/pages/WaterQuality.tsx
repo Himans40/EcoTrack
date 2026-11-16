@@ -361,7 +361,7 @@ export default function WaterQualityPage() {
                   />
                   {latestAssessment ? (
                     <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <p className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">
                         Latest sample, parameter by parameter
                       </p>
                       <ul className="space-y-1.5">
@@ -487,7 +487,7 @@ function ComparisonRow({
   const assessment = assessWaterMeasurement(measurement)
   return (
     <div className="rounded-lg border border-slate-200 px-3 py-2.5 dark:border-slate-800">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
         {title}
       </p>
       <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">

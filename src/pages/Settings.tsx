@@ -327,7 +327,7 @@ export default function SettingsPage() {
         <CardBody className="space-y-5">
           <dl className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-slate-200 px-3 py-2.5 dark:border-slate-800">
-              <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <dt className="text-xs text-slate-500 dark:text-slate-400">
                 Your water records
               </dt>
               <dd className="mt-0.5 text-xl font-bold text-slate-900 dark:text-slate-100">
@@ -335,7 +335,7 @@ export default function SettingsPage() {
               </dd>
             </div>
             <div className="rounded-lg border border-slate-200 px-3 py-2.5 dark:border-slate-800">
-              <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <dt className="text-xs text-slate-500 dark:text-slate-400">
                 Demonstration samples
               </dt>
               <dd className="mt-0.5 text-xl font-bold text-slate-900 dark:text-slate-100">
@@ -343,7 +343,7 @@ export default function SettingsPage() {
               </dd>
             </div>
             <div className="rounded-lg border border-slate-200 px-3 py-2.5 dark:border-slate-800">
-              <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <dt className="text-xs text-slate-500 dark:text-slate-400">
                 Saved locations
               </dt>
               <dd className="mt-0.5 text-xl font-bold text-slate-900 dark:text-slate-100">

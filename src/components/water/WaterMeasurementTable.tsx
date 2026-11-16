@@ -158,7 +158,7 @@ export function WaterMeasurementTable({
                     <td colSpan={10} className="px-4 py-4">
                       <div className="grid gap-4 lg:grid-cols-3">
                         <div className="lg:col-span-2">
-                          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          <p className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">
                             Parameter assessment
                           </p>
                           <ul className="space-y-2">
@@ -188,7 +188,7 @@ export function WaterMeasurementTable({
                         <div className="space-y-3">
                           {measurement.notes ? (
                             <div>
-                              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                              <p className="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                                 Observations
                               </p>
                               <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
@@ -197,7 +197,7 @@ export function WaterMeasurementTable({
                             </div>
                           ) : null}
                           <div>
-                            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                            <p className="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                               Record metadata
                             </p>
                             <ul className="space-y-0.5 text-xs text-slate-600 dark:text-slate-400">

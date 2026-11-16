@@ -102,11 +102,11 @@ export default function AirQualityPage() {
       ) : null}
 
       {/* Index standard notice */}
-      <div className="flex items-start gap-3 rounded-xl border border-water-300/60 bg-water-50 px-4 py-3 text-sm text-water-900 dark:border-water-500/30 dark:bg-water-500/10 dark:text-water-200">
-        <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+      <div className="flex items-start gap-3 border-l-2 border-water-500 py-1 pl-4 text-[13px] text-slate-600 dark:text-slate-300">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-water-600 dark:text-water-400" aria-hidden />
         <div>
-          <p className="font-semibold">Index standard: US EPA AQI</p>
-          <p className="mt-0.5 leading-relaxed text-water-800 dark:text-water-300/90">
+          <p className="font-medium text-slate-900 dark:text-white">Index standard: US EPA AQI</p>
+          <p className="mt-0.5 max-w-4xl leading-relaxed">
             Every AQI number and category on this page follows the United States EPA
             scale ({AIR_QUALITY_SOURCE.standard}). AQI thresholds differ between
             countries — India's CPCB NAQI and the European EAQI classify the same air
@@ -154,7 +154,7 @@ export default function AirQualityPage() {
             )}
 
             <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <p className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">
                 Measurement confidence &amp; freshness
               </p>
               <ul className="space-y-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
@@ -294,7 +294,7 @@ export default function AirQualityPage() {
                     <td className="table-cell">
                       <Badge className={category.colorClass}>{category.label}</Badge>
                       {isCurrent ? (
-                        <span className="ml-2 text-[11px] font-semibold uppercase tracking-wide text-brand-700 dark:text-brand-400">
+                        <span className="ml-2 text-[11px] font-semibold text-brand-700 dark:text-brand-400">
                           current
                         </span>
                       ) : null}

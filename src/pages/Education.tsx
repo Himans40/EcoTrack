@@ -218,7 +218,7 @@ function PollutantsPanel() {
                   {meta.description}
                 </p>
                 <div>
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <p className="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                     Main sources
                   </p>
                   <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">

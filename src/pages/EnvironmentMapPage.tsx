@@ -105,7 +105,7 @@ export default function EnvironmentMapPage() {
           />
           <CardBody className="space-y-4">
             <div>
-              <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
                 <Wind className="h-3.5 w-3.5" aria-hidden />
                 Air quality pin colour (US AQI)
               </p>
@@ -138,7 +138,7 @@ export default function EnvironmentMapPage() {
             </div>
 
             <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
-              <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
                 <Droplets className="h-3.5 w-3.5" aria-hidden />
                 Water sample pin colour (composite score)
               </p>
