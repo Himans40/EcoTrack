@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "seed": "node prisma/seed.js",
+    "test": "node --test",
     "test:math": "node src/utils/test-calculators.js",
     "db:push": "prisma db push",
     "prisma:generate": "prisma generate",

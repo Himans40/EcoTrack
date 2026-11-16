@@ -10,7 +10,10 @@ dotenv.config();
 
 // Initialize Express app and Prisma Client
 const app = express();
-const prisma = new PrismaClient();
+// DATABASE_URL lets the test suite point at a throwaway copy of the database.
+const prisma = new PrismaClient(
+  process.env.DATABASE_URL ? { datasourceUrl: process.env.DATABASE_URL } : undefined
+);
 const PORT = process.env.PORT || 5001;
 
 // ==========================================
@@ -473,23 +476,24 @@ app.use((error, req, res, next) => {
 });
 
 // ==========================================
-// Start HTTP Server
+// Start HTTP Server (only when run directly, so tests can import the app)
 // ==========================================
-const server = app.listen(PORT, () => {
-  console.log(`\n======================================================`);
-  console.log(`🌍 EcoMonitor Backend Server running on http://localhost:${PORT}`);
-  console.log(`📡 JavaScript & Express Engine Active`);
-  console.log(`======================================================\n`);
-});
-
-process.on('SIGINT', async () => {
-  console.log('\nGracefully shutting down server...');
-  await prisma.$disconnect();
-  server.close(() => {
-    console.log('EcoMonitor backend service closed.');
-    process.exit(0);
+if (require.main === module) {
+  const server = app.listen(PORT, () => {
+    console.log(`\n======================================================`);
+    console.log(`🌍 EcoMonitor Backend Server running on http://localhost:${PORT}`);
+    console.log(`📡 JavaScript & Express Engine Active`);
+    console.log(`======================================================\n`);
   });
-});
+
+  process.on('SIGINT', async () => {
+    console.log('\nGracefully shutting down server...');
+    await prisma.$disconnect();
+    server.close(() => {
+      console.log('EcoMonitor backend service closed.');
+      process.exit(0);
+    });
+  });
+}
 
 module.exports = { app, prisma };
-
