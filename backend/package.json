@@ -1,16 +1,18 @@
 {
   "name": "ecotrack-backend",
   "version": "1.0.0",
-  "description": "EcoMonitor Backend REST API using Express and Prisma ORM (JavaScript)",
+  "description": "EcoTrack REST API (Express + Prisma + SQLite)",
   "main": "server.js",
   "scripts": {
+    "setup": "prisma db push --skip-generate && prisma generate && node prisma/seed.js",
     "dev": "nodemon server.js",
     "start": "node server.js",
     "seed": "node prisma/seed.js",
+    "test:math": "node src/utils/test-calculators.js",
+    "db:push": "prisma db push",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "test:math": "node src/utils/test-calculators.js"
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
