@@ -90,16 +90,16 @@ export function TopBar({
           </button>
 
           {/* Location switcher */}
-          <div ref={switcherRef} className="relative min-w-0 flex-1 sm:flex-none">
+          <div ref={switcherRef} className="relative min-w-0">
             <button
               type="button"
               onClick={() => setIsSwitcherOpen((open) => !open)}
               aria-expanded={isSwitcherOpen}
               aria-haspopup="listbox"
-              className="-ml-1 flex w-full max-w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-slate-200/60 sm:w-auto dark:hover:bg-slate-800/70"
+              className="-ml-1 flex max-w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-slate-200/60 dark:hover:bg-slate-800/70"
             >
               <MapPin className="h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400" aria-hidden />
-              <span className="min-w-0 flex-1 truncate text-[15px] font-semibold sm:flex-none text-slate-900 dark:text-white">
+              <span className="max-w-[55vw] flex-none truncate text-[15px] font-semibold sm:max-w-xs text-slate-900 dark:text-white">
                 {formatLocationName(activeLocation)}
               </span>
               <ChevronDown
@@ -178,6 +178,15 @@ export function TopBar({
               </span>
             ) : null}
 
+            {/* Phones get an icon-only button; the wider search box is md and up. */}
+            <button
+              type="button"
+              onClick={onOpenCommandMenu}
+              aria-label="Open command menu"
+              className="grid h-8 w-8 place-items-center rounded-md text-slate-600 hover:bg-slate-200/60 md:hidden dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              <Search className="h-[18px] w-[18px]" aria-hidden />
+            </button>
             <button
               type="button"
               onClick={onOpenCommandMenu}
