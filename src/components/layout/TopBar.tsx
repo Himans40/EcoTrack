@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   Check,
   ChevronDown,
+  MapPin,
   Menu,
   Monitor,
   Moon,
@@ -68,8 +69,8 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
-        <div className="flex items-center gap-2 px-3 py-3 sm:px-5">
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-slate-50/85 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/85">
+        <div className="flex h-[60px] items-center gap-2 px-3 sm:px-5 lg:px-8">
           <button
             type="button"
             onClick={onOpenMenu}
@@ -86,21 +87,25 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
               onClick={() => setIsSwitcherOpen((open) => !open)}
               aria-expanded={isSwitcherOpen}
               aria-haspopup="listbox"
-              className="flex w-full max-w-full items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-left text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50 sm:w-auto sm:min-w-[16rem] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              className="-ml-1 flex w-full max-w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-slate-200/60 sm:w-auto dark:hover:bg-slate-800/70"
             >
-              <span className="min-w-0 flex-1 truncate">
+              <MapPin className="h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400" aria-hidden />
+              <span className="min-w-0 flex-1 truncate text-[15px] font-semibold sm:flex-none text-slate-900 dark:text-white">
                 {formatLocationName(activeLocation)}
               </span>
-              <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${isSwitcherOpen ? 'rotate-180' : ''}`}
+                aria-hidden
+              />
             </button>
 
             {isSwitcherOpen ? (
               <div
                 role="listbox"
                 aria-label="Saved locations"
-                className="absolute left-0 z-40 mt-2 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900"
+                className="pop-in absolute left-0 z-40 mt-2 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_12px_32px_-12px_rgb(13_19_17/0.25)] dark:border-slate-700 dark:bg-slate-900"
               >
-                <p className="border-b border-slate-200 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                <p className="px-3 pb-1 pt-3 text-xs text-slate-500 dark:text-slate-400">
                   Saved locations
                 </p>
                 <ul className="max-h-64 overflow-y-auto py-1">
@@ -156,9 +161,10 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
             ) : null}
           </div>
 
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="ml-auto flex items-center gap-1">
             {lastUpdatedAt ? (
-              <span className="hidden text-xs text-slate-500 md:inline dark:text-slate-400">
+              <span className="mr-2 hidden items-center gap-1.5 text-xs text-slate-500 md:inline-flex dark:text-slate-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-brand-500" aria-hidden />
                 Updated {formatRelativeTime(lastUpdatedAt)}
               </span>
             ) : null}
@@ -189,7 +195,7 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
               onClick={cycleTheme}
               aria-label={`Theme: ${THEME_LABELS[settings.theme]}. Click to change.`}
               title={THEME_LABELS[settings.theme]}
-              className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="grid h-8 w-8 place-items-center rounded-md text-slate-600 hover:bg-slate-200/60 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               <ThemeIcon className="h-[18px] w-[18px]" aria-hidden />
             </button>
@@ -204,13 +210,13 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
             type="button"
             aria-label="Close city search"
             onClick={() => setIsSearchOpen(false)}
-            className="absolute inset-0 bg-slate-900/50"
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]"
           />
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Search for a city"
-            className="relative w-full max-w-lg rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-700 dark:bg-slate-900"
+            className="pop-in relative w-full max-w-lg rounded-xl border border-slate-200 bg-white p-5 shadow-[0_24px_48px_-16px_rgb(13_19_17/0.35)] dark:border-slate-700 dark:bg-slate-900"
           >
             <h2 className="mb-1 text-base font-semibold text-slate-900 dark:text-slate-100">
               Add a monitoring location
