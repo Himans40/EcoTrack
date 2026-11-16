@@ -14,7 +14,7 @@ async function main() {
   // --------------------------------------------------------------------------
   // Station 1: Central City Park (Clean Eco-Zone)
   // --------------------------------------------------------------------------
-  const parkAqi = calculateAQI(12.0, 25.0);
+  const parkAqi = calculateAQI(8.0, 25.0);
   const parkWqi = calculateWQI(7.3, 1.2);
 
   const park = await prisma.location.create({
@@ -25,17 +25,17 @@ async function main() {
       airReadings: {
         create: [
           {
-            pm25: 10.0,
+            pm25: 7.0,
             pm10: 22.0,
             no2: 14.0,
-            aqiScore: 38.0,
+            aqiScore: calculateAQI(7.0, 22.0).aqi,
             timestamp: new Date(Date.now() - 1000 * 60 * 30),
           },
           {
-            pm25: 12.0,
+            pm25: 8.0,
             pm10: 25.0,
             no2: 15.0,
-            aqiScore: parkAqi.aqi, // Computed: 42 (Good)
+            aqiScore: parkAqi.aqi, // Computed: 44 (Good)
             timestamp: new Date(),
           },
         ],

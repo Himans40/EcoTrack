@@ -5,8 +5,8 @@ console.log('🧪 Running EcoMonitor Mathematical Engine Verification (JS)');
 console.log('======================================================\n');
 
 // 1. Clean Atmosphere Test
-const cleanAir = calculateAQI(10.0, 25.0);
-console.log('1. Clean Air Test (PM2.5: 10 µg/m³, PM10: 25 µg/m³)');
+const cleanAir = calculateAQI(8.0, 25.0);
+console.log('1. Clean Air Test (PM2.5: 8 µg/m³, PM10: 25 µg/m³)');
 console.log(`   ➜ AQI Score: ${cleanAir.aqi} | Category: "${cleanAir.category}" | Dominant: ${cleanAir.dominantPollutant}`);
 if (cleanAir.aqi <= 50 && cleanAir.category === 'Good') {
   console.log('   ✅ PASS: Correctly classified as Good air quality.\n');

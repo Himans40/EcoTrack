@@ -3,14 +3,15 @@
  * Standard Breakpoint Algorithms for Air Quality Index (AQI) and Water Quality Index (WQI)
  */
 
-// EPA PM2.5 Standard Breakpoints (µg/m³)
+// EPA PM2.5 breakpoints (µg/m³), revised May 2024 — the same table the web
+// app uses in src/lib/aqi.ts, so both sides classify air identically.
 const PM25_BREAKPOINTS = [
-  { cLow: 0.0, cHigh: 12.0, iLow: 0, iHigh: 50 },
-  { cLow: 12.1, cHigh: 35.4, iLow: 51, iHigh: 100 },
+  { cLow: 0.0, cHigh: 9.0, iLow: 0, iHigh: 50 },
+  { cLow: 9.1, cHigh: 35.4, iLow: 51, iHigh: 100 },
   { cLow: 35.5, cHigh: 55.4, iLow: 101, iHigh: 150 },
-  { cLow: 55.5, cHigh: 150.4, iLow: 151, iHigh: 200 },
-  { cLow: 150.5, cHigh: 250.4, iLow: 201, iHigh: 300 },
-  { cLow: 250.5, cHigh: 500.4, iLow: 301, iHigh: 500 },
+  { cLow: 55.5, cHigh: 125.4, iLow: 151, iHigh: 200 },
+  { cLow: 125.5, cHigh: 225.4, iLow: 201, iHigh: 300 },
+  { cLow: 225.5, cHigh: 325.4, iLow: 301, iHigh: 500 },
 ];
 
 // EPA PM10 Standard Breakpoints (µg/m³)
@@ -22,6 +23,12 @@ const PM10_BREAKPOINTS = [
   { cLow: 355, cHigh: 424, iLow: 201, iHigh: 300 },
   { cLow: 425, cHigh: 604, iLow: 301, iHigh: 500 },
 ];
+
+/** Cut a number to `decimals` places without rounding (EPA rule). */
+function truncate(value, decimals) {
+  const factor = 10 ** decimals;
+  return Math.trunc(value * factor) / factor;
+}
 
 /**
  * Linear interpolation formula:
@@ -47,8 +54,10 @@ function interpolate(c, breakpoints) {
  * @param {number} pm10 Particulate matter ≤ 10 µm (µg/m³)
  */
 function calculateAQI(pm25, pm10) {
-  const pm25SubIndex = interpolate(pm25, PM25_BREAKPOINTS);
-  const pm10SubIndex = interpolate(pm10, PM10_BREAKPOINTS);
+  // Truncate first (PM2.5 to 0.1, PM10 to whole numbers) so a value such as
+  // 9.05 cannot fall into the gap between two bands.
+  const pm25SubIndex = interpolate(truncate(pm25, 1), PM25_BREAKPOINTS);
+  const pm10SubIndex = interpolate(truncate(pm10, 0), PM10_BREAKPOINTS);
 
   const aqi = Math.max(pm25SubIndex, pm10SubIndex);
   const dominantPollutant = pm25SubIndex >= pm10SubIndex ? 'PM2.5' : 'PM10';
@@ -97,6 +106,7 @@ function calculateWQI(ph, turbidity) {
 }
 
 module.exports = {
+  truncate,
   calculateAQI,
   calculateWQI,
 };
