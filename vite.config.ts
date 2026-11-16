@@ -8,6 +8,12 @@ export default defineConfig({
     // `@/` points at src/, so imports stay stable when files move.
     alias: { '@': path.resolve(__dirname, './src') },
   },
+  server: {
+    // Forward API calls to the Express backend during development.
+    proxy: {
+      '/api': 'http://localhost:5001',
+    },
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,

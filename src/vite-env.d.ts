@@ -12,6 +12,8 @@ interface ImportMetaEnv {
   readonly VITE_WEATHER_API_BASE?: string
   readonly VITE_GEOCODING_API_BASE?: string
   readonly VITE_OSM_TILE_URL?: string
+  /** EcoTrack backend base URL; defaults to `/api` (proxied in development). */
+  readonly VITE_BACKEND_URL?: string
 }
 
 interface ImportMeta {

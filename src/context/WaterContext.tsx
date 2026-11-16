@@ -5,6 +5,9 @@
  * public real-time API that covers arbitrary water bodies, so the user
  * records samples manually and the application persists, scores, charts and
  * exports them. Records are user data, never represented as sensor telemetry.
+ *
+ * localStorage stays the source of truth so the app works offline. When the
+ * EcoTrack backend is reachable, every change is mirrored to it as well.
  */
 
 import {
@@ -13,6 +16,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
@@ -21,6 +25,17 @@ import { isWaterMeasurement } from '@/lib/guards'
 import { isArrayOf, readStorage, STORAGE_KEYS, writeStorage } from '@/lib/storage'
 import { createId } from '@/lib/id'
 import { buildDemoWaterMeasurements } from '@/services/demoData'
+import {
+  deleteWaterSample,
+  deleteWaterSamples,
+  fetchWaterSamples,
+  isBackendSyncEnabled,
+  mergeWaterSamples,
+  saveWaterSample,
+} from '@/services/backend'
+
+/** Whether records are currently being mirrored to the backend. */
+export type SyncStatus = 'connecting' | 'synced' | 'local-only'
 
 interface WaterContextValue {
   /** All records, newest sample first. */
@@ -35,6 +50,7 @@ interface WaterContextValue {
   clearDemoMeasurements: () => number
   deleteAllMeasurements: () => void
   hasDemoMeasurements: boolean
+  syncStatus: SyncStatus
 }
 
 const WaterContext = createContext<WaterContextValue | null>(null)
@@ -61,6 +77,49 @@ export function WaterProvider({ children }: { children: ReactNode }) {
     writeStorage(STORAGE_KEYS.waterMeasurements, measurements)
   }, [measurements])
 
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(
+    isBackendSyncEnabled ? 'connecting' : 'local-only',
+  )
+  const isOnline = useRef(false)
+
+  // On start-up, pull the server's records, merge them with the local ones
+  // and push back whatever the server was missing.
+  useEffect(() => {
+    if (!isBackendSyncEnabled) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const remote = await fetchWaterSamples()
+        if (cancelled) return
+        const local = readStorage(STORAGE_KEYS.waterMeasurements, [], isWaterMeasurementArray)
+        const merged = mergeWaterSamples(local, remote)
+        const remoteById = new Map(remote.map((record) => [record.id, record]))
+        const toPush = merged.filter(
+          (record) => remoteById.get(record.id)?.updatedAt !== record.updatedAt,
+        )
+        await Promise.all(toPush.map(saveWaterSample))
+        if (cancelled) return
+        isOnline.current = true
+        setMeasurements(sortMeasurements(merged))
+        setSyncStatus('synced')
+      } catch {
+        if (!cancelled) setSyncStatus('local-only')
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  /** Run a backend call if connected; drop to local-only mode if it fails. */
+  const mirror = useCallback((call: () => Promise<void>) => {
+    if (!isOnline.current) return
+    call().catch(() => {
+      isOnline.current = false
+      setSyncStatus('local-only')
+    })
+  }, [])
+
   const addMeasurement = useCallback((input: WaterMeasurementInput) => {
     const timestamp = new Date().toISOString()
     const record: WaterMeasurement = {
@@ -70,33 +129,33 @@ export function WaterProvider({ children }: { children: ReactNode }) {
       updatedAt: timestamp,
     }
     setMeasurements((previous) => sortMeasurements([record, ...previous]))
+    mirror(() => saveWaterSample(record))
     return record
-  }, [])
+  }, [mirror])
 
   const updateMeasurement = useCallback(
     (id: string, patch: Partial<WaterMeasurementInput>) => {
+      const current = measurements.find((record) => record.id === id)
+      if (!current) return
+      const updated: WaterMeasurement = {
+        ...current,
+        ...patch,
+        updatedAt: new Date().toISOString(),
+        // An edited demonstration record becomes the user's own data.
+        isDemo: false,
+      }
       setMeasurements((previous) =>
-        sortMeasurements(
-          previous.map((record) =>
-            record.id === id
-              ? {
-                  ...record,
-                  ...patch,
-                  updatedAt: new Date().toISOString(),
-                  // An edited demonstration record becomes the user's own data.
-                  isDemo: false,
-                }
-              : record,
-          ),
-        ),
+        sortMeasurements(previous.map((record) => (record.id === id ? updated : record))),
       )
+      mirror(() => saveWaterSample(updated))
     },
-    [],
+    [measurements, mirror],
   )
 
   const deleteMeasurement = useCallback((id: string) => {
     setMeasurements((previous) => previous.filter((record) => record.id !== id))
-  }, [])
+    mirror(() => deleteWaterSample(id))
+  }, [mirror])
 
   const getMeasurement = useCallback(
     (id: string) => measurements.find((record) => record.id === id),
@@ -121,21 +180,24 @@ export function WaterProvider({ children }: { children: ReactNode }) {
         const toAdd = fresh.filter((sample) => !previousIds.has(sample.id))
         return sortMeasurements([...toAdd, ...previous])
       })
+      mirror(() => Promise.all(fresh.map(saveWaterSample)).then(() => undefined))
     }
     return fresh.length
-  }, [measurements])
+  }, [measurements, mirror])
 
   const clearDemoMeasurements = useCallback(() => {
     const removed = measurements.filter((record) => record.isDemo).length
     if (removed > 0) {
       setMeasurements((previous) => previous.filter((record) => !record.isDemo))
+      mirror(() => deleteWaterSamples({ demoOnly: true }))
     }
     return removed
-  }, [measurements])
+  }, [measurements, mirror])
 
   const deleteAllMeasurements = useCallback(() => {
     setMeasurements([])
-  }, [])
+    mirror(() => deleteWaterSamples({ demoOnly: false }))
+  }, [mirror])
 
   const hasDemoMeasurements = useMemo(
     () => measurements.some((record) => record.isDemo),
@@ -153,6 +215,7 @@ export function WaterProvider({ children }: { children: ReactNode }) {
       clearDemoMeasurements,
       deleteAllMeasurements,
       hasDemoMeasurements,
+      syncStatus,
     }),
     [
       measurements,
@@ -164,6 +227,7 @@ export function WaterProvider({ children }: { children: ReactNode }) {
       clearDemoMeasurements,
       deleteAllMeasurements,
       hasDemoMeasurements,
+      syncStatus,
     ],
   )
 
