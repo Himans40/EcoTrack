@@ -68,3 +68,17 @@ export function mergeWaterSamples(
   }
   return Array.from(merged.values())
 }
+
+/** Summary returned by GET /api/water-samples/stats. */
+export interface WaterSampleStats {
+  total: number
+  demo: number
+  latestSampledAt: string | null
+  averages: Record<string, number | null>
+  bySourceType: Record<string, number>
+}
+
+export async function fetchWaterSampleStats(): Promise<WaterSampleStats> {
+  const body = await request<{ data: WaterSampleStats }>(`${SAMPLES_URL}/stats`)
+  return body.data
+}

@@ -26,6 +26,7 @@ import {
   useSettings,
 } from '@/context/SettingsContext'
 import { useToast } from '@/context/ToastContext'
+import { ServerStats } from '@/components/ServerStats'
 import { useLocations } from '@/context/LocationContext'
 import { useWaterMeasurements } from '@/context/WaterContext'
 import { useEnvironment } from '@/context/EnvironmentDataContext'
@@ -327,6 +328,7 @@ export default function SettingsPage() {
           actions={<SyncIndicator status={syncStatus} />}
         />
         <CardBody className="space-y-5">
+          {syncStatus === 'synced' ? <ServerStats refreshKey={measurements.length} /> : null}
           <dl className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-slate-200 px-3 py-2.5 dark:border-slate-800">
               <dt className="text-xs text-slate-500 dark:text-slate-400">
