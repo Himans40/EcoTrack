@@ -167,6 +167,15 @@ describe('fetchAirQuality', () => {
     expect(dataset.hourly.at(-1)?.usAqi).toBe(188)
   })
 
+  it('keeps forecast hours separately from the history', async () => {
+    mockFetchOnce(buildResponse())
+    const dataset = await fetchAirQuality(LOCATION)
+    expect(dataset.forecast.map((point) => point.time)).toEqual([
+      '2026-11-11T04:00',
+      '2026-11-11T05:00',
+    ])
+  })
+
   it('trims the history to the requested number of hours', async () => {
     mockFetchOnce(buildResponse())
     const dataset = await fetchAirQuality(LOCATION, { historyHours: 2 })

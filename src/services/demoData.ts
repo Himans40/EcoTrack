@@ -164,6 +164,9 @@ export function buildDemoAirQuality(
       observedAt: latest.time,
     },
     hourly,
+    // No forecast for demonstration data: inventing future values would be
+    // even less defensible than inventing past ones.
+    forecast: [],
     provenance: {
       origin: 'demo',
       sourceName: 'Locally generated demonstration dataset',

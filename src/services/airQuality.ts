@@ -65,8 +65,9 @@ export interface FetchAirQualityOptions {
 /**
  * Fetch current conditions plus hourly history for a location.
  *
- * Future forecast hours are discarded: the charts are labelled "historical",
- * so they must only contain observations up to the current hour.
+ * Forecast hours are kept apart from the history: the charts are labelled
+ * "historical", so `hourly` only contains observations up to the current
+ * hour, and the next 24 forecast hours go into `forecast`.
  */
 export async function fetchAirQuality(
   location: GeoLocation,
@@ -81,7 +82,7 @@ export async function fetchAirQuality(
     current: CURRENT_FIELDS,
     hourly: HOURLY_FIELDS,
     past_days: pastDays,
-    forecast_days: 1,
+    forecast_days: 2,
     timezone: 'auto',
   })
 
@@ -95,12 +96,15 @@ export async function fetchAirQuality(
     : null
 
   const current = parseSnapshot(raw, currentLocalTime)
-  const hourly = parseHourly(raw, currentLocalTime, historyHours)
+  const allHours = parseHourlyPoints(raw)
+  const hourly = observedHours(allHours, currentLocalTime).slice(-historyHours)
+  const forecast = forecastHours(allHours, currentLocalTime)
 
   return {
     location,
     current,
     hourly,
+    forecast,
     provenance: {
       origin: 'api',
       sourceName: AIR_QUALITY_SOURCE.name,
@@ -149,11 +153,8 @@ function parseSnapshot(
   }
 }
 
-function parseHourly(
-  raw: AirQualityResponse,
-  currentLocalTime: string | null,
-  historyHours: number,
-): AirQualityHourlyPoint[] {
+/** Turn the API's column arrays into one object per hour. */
+function parseHourlyPoints(raw: AirQualityResponse): AirQualityHourlyPoint[] {
   const block = raw.hourly
   if (!block || !Array.isArray(block.time)) return []
 
@@ -169,7 +170,7 @@ function parseHourly(
   const so2Series = series('sulphur_dioxide')
   const o3Series = series('ozone')
 
-  const points: AirQualityHourlyPoint[] = times.map((time, index) => ({
+  return times.map((time, index) => ({
     time,
     usAqi: readNumber(usAqiSeries[index]),
     pm2_5: readNumber(pm25Series[index]),
@@ -179,14 +180,25 @@ function parseHourly(
     sulphur_dioxide: readNumber(so2Series[index]),
     ozone: readNumber(o3Series[index]),
   }))
+}
 
-  // Drop forecast hours. Both timestamps are naive local strings in the same
-  // timezone, and ISO-8601 sorts lexicographically, so a string compare is
-  // exact here and avoids any timezone arithmetic.
-  const observed = currentLocalTime
-    ? points.filter((point) => point.time <= currentLocalTime)
-    : points
+// Both timestamps are naive local strings in the same timezone, and ISO-8601
+// sorts lexicographically, so a plain string compare splits past from future
+// exactly and avoids any timezone arithmetic.
 
-  // Keep only the requested window, counting back from the newest hour.
-  return observed.slice(-historyHours)
+/** Hours up to and including the current one. */
+function observedHours(
+  points: AirQualityHourlyPoint[],
+  currentLocalTime: string | null,
+): AirQualityHourlyPoint[] {
+  return currentLocalTime ? points.filter((point) => point.time <= currentLocalTime) : points
+}
+
+/** The next 24 hours after the current one. */
+function forecastHours(
+  points: AirQualityHourlyPoint[],
+  currentLocalTime: string | null,
+): AirQualityHourlyPoint[] {
+  if (!currentLocalTime) return []
+  return points.filter((point) => point.time > currentLocalTime).slice(0, 24)
 }

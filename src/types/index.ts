@@ -90,7 +90,10 @@ export interface AirQualityHourlyPoint {
 export interface AirQualityDataset {
   location: GeoLocation
   current: AirQualitySnapshot
+  /** Observed hours only, oldest first. */
   hourly: AirQualityHourlyPoint[]
+  /** Model forecast for the coming hours, kept apart from observations. */
+  forecast: AirQualityHourlyPoint[]
   provenance: DataProvenance
 }
 

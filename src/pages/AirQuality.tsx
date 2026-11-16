@@ -9,6 +9,7 @@ import { useEnvironment } from '@/context/EnvironmentDataContext'
 import { useLocations } from '@/context/LocationContext'
 import { useSettings } from '@/context/SettingsContext'
 import { AqiAdvice, AqiGauge, AqiScaleStrip, PollutantGrid } from '@/components/air'
+import { AqiForecast } from '@/components/air/AqiForecast'
 import { AqiTrendChart, PollutantTrendChart } from '@/components/charts'
 import { PageHeader } from '@/components/StatCard'
 import {
@@ -206,6 +207,9 @@ export default function AirQualityPage() {
           )}
         </CardBody>
       </Card>
+
+      {/* Forecast */}
+      {airQuality ? <AqiForecast forecast={airQuality.forecast} /> : null}
 
       {/* Trends */}
       <div className="grid gap-5 xl:grid-cols-2">
