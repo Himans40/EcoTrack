@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
 import { MobileSidebar, Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
+import { CommandMenu, useCommandMenuShortcut } from './CommandMenu'
 
 export function AppLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isCommandMenuOpen, setIsCommandMenuOpen] = useState(false)
+  const openCommandMenu = useCallback(() => setIsCommandMenuOpen(true), [])
+  useCommandMenuShortcut(openCommandMenu)
   const { pathname } = useLocation()
 
   // Scroll back to the top on navigation; otherwise a long page leaves the
@@ -18,8 +21,9 @@ export function AppLayout() {
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
       <Sidebar />
       <MobileSidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      {isCommandMenuOpen ? <CommandMenu onClose={() => setIsCommandMenuOpen(false)} /> : null}
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar onOpenMenu={() => setIsMenuOpen(true)} />
+        <TopBar onOpenMenu={() => setIsMenuOpen(true)} onOpenCommandMenu={openCommandMenu} />
         <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <Outlet />
         </main>
