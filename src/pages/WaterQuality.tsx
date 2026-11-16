@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import type { WaterMeasurement, WaterMeasurementInput, WaterParameterKey } from '@/types'
 import { useWaterMeasurements } from '@/context/WaterContext'
+import { useToast } from '@/context/ToastContext'
 import { useLocations } from '@/context/LocationContext'
 import { WaterMeasurementForm } from '@/components/water/WaterMeasurementForm'
 import { WaterMeasurementTable } from '@/components/water/WaterMeasurementTable'
@@ -76,13 +77,9 @@ export default function WaterQualityPage() {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editing, setEditing] = useState<WaterMeasurement | null>(null)
   const [trendSeries, setTrendSeries] = useState<TrendSeries>('score')
-  const [toast, setToast] = useState<string | null>(null)
   const [locationFilter, setLocationFilter] = useState<string>('all')
 
-  const announce = (message: string) => {
-    setToast(message)
-    window.setTimeout(() => setToast(null), 4000)
-  }
+  const { showToast: announce } = useToast()
 
   /** Distinct sample locations, for the comparison filter. */
   const locationOptions = useMemo(() => {
@@ -162,16 +159,6 @@ export default function WaterQualityPage() {
           </>
         }
       />
-
-      {toast ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="rounded-lg border border-brand-300 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-800 dark:border-brand-500/40 dark:bg-brand-500/10 dark:text-brand-300"
-        >
-          {toast}
-        </div>
-      ) : null}
 
       {/* Entry form */}
       {isFormOpen ? (

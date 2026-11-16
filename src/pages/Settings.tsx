@@ -24,6 +24,7 @@ import {
   REFRESH_INTERVAL_OPTIONS,
   useSettings,
 } from '@/context/SettingsContext'
+import { useToast } from '@/context/ToastContext'
 import { useLocations } from '@/context/LocationContext'
 import { useWaterMeasurements } from '@/context/WaterContext'
 import { useEnvironment } from '@/context/EnvironmentDataContext'
@@ -64,15 +65,11 @@ export default function SettingsPage() {
   } = useWaterMeasurements()
   const { refresh, isRefreshing, lastUpdatedAt, isDemoMode } = useEnvironment()
 
-  const [toast, setToast] = useState<string | null>(null)
   const [confirmAction, setConfirmAction] = useState<
     'deleteAllWater' | 'resetEverything' | null
   >(null)
 
-  const announce = (message: string) => {
-    setToast(message)
-    window.setTimeout(() => setToast(null), 4000)
-  }
+  const { showToast: announce } = useToast()
 
   const storageAvailable = isStorageAvailable()
   const demoCount = measurements.filter((m) => m.isDemo).length
@@ -84,16 +81,6 @@ export default function SettingsPage() {
         title="Settings"
         description="Appearance, units, refresh behaviour, local data management and the data sources this application uses."
       />
-
-      {toast ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="rounded-lg border border-brand-300 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-800 dark:border-brand-500/40 dark:bg-brand-500/10 dark:text-brand-300"
-        >
-          {toast}
-        </div>
-      ) : null}
 
       {!storageAvailable ? (
         <div
@@ -344,7 +331,7 @@ export default function SettingsPage() {
             <Button
               onClick={() => {
                 if (measurements.length === 0) {
-                  announce('There are no records to export.')
+                  announce('There are no records to export.', 'error')
                   return
                 }
                 downloadTextFile(

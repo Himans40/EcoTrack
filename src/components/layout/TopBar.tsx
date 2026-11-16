@@ -19,6 +19,7 @@ import type { ThemeMode } from '@/types'
 import { useLocations } from '@/context/LocationContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useEnvironment } from '@/context/EnvironmentDataContext'
+import { useToast } from '@/context/ToastContext'
 import { formatLocationName, formatRelativeTime } from '@/lib/format'
 import { Button } from '../ui'
 import { LocationSearch } from '../LocationSearch'
@@ -36,6 +37,7 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
     useLocations()
   const { settings, updateSettings } = useSettings()
   const { refresh, isRefreshing, lastUpdatedAt } = useEnvironment()
+  const { showToast } = useToast()
 
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -229,6 +231,7 @@ export function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
               onSelect={(location) => {
                 selectLocation(location)
                 setIsSearchOpen(false)
+                showToast(`Now monitoring ${formatLocationName(location)}`)
               }}
             />
             <div className="mt-4 flex justify-end">
