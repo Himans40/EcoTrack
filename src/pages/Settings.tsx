@@ -30,7 +30,7 @@ import { useLocations } from '@/context/LocationContext'
 import { useWaterMeasurements } from '@/context/WaterContext'
 import { useEnvironment } from '@/context/EnvironmentDataContext'
 import { PageHeader } from '@/components/StatCard'
-import { Button, Card, CardBody, CardHeader, DisclaimerNote } from '@/components/ui'
+import { Button, Card, CardBody, CardHeader, DisclaimerNote, SyncIndicator } from '@/components/ui'
 import {
   buildExportFilename,
   downloadTextFile,
@@ -63,6 +63,7 @@ export default function SettingsPage() {
     clearDemoMeasurements,
     deleteAllMeasurements,
     hasDemoMeasurements,
+    syncStatus,
   } = useWaterMeasurements()
   const { refresh, isRefreshing, lastUpdatedAt, isDemoMode } = useEnvironment()
 
@@ -320,9 +321,10 @@ export default function SettingsPage() {
       {/* Local data */}
       <Card>
         <CardHeader
-          title="Local data"
+          title="Your data"
           icon={<Database className="h-4 w-4" aria-hidden />}
-          subtitle="Everything this application stores lives in this browser only. Nothing is uploaded to any server."
+          subtitle="Settings and saved cities stay in this browser. Water records are also saved to the EcoTrack backend whenever it is running."
+          actions={<SyncIndicator status={syncStatus} />}
         />
         <CardBody className="space-y-5">
           <dl className="grid gap-3 sm:grid-cols-3">
@@ -399,13 +401,13 @@ export default function SettingsPage() {
           </div>
 
           {/* Destructive actions, each behind an explicit confirm step */}
-          <div className="space-y-3 rounded-lg border border-red-300/60 bg-red-50/60 p-4 dark:border-red-500/30 dark:bg-red-500/5">
-            <p className="text-sm font-semibold text-red-900 dark:text-red-300">
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-red-200 p-4 dark:border-red-500/25">
+            <p className="w-full text-sm font-medium text-red-800 dark:text-red-300">
               Destructive actions
             </p>
 
             {confirmAction === 'deleteAllWater' ? (
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex w-full flex-wrap items-center gap-2">
                 <span className="text-sm text-red-800 dark:text-red-300">
                   Delete all {measurements.length} water record(s)? This cannot be
                   undone.
@@ -427,8 +429,8 @@ export default function SettingsPage() {
               </div>
             ) : (
               <Button
-                variant="danger"
                 size="sm"
+                className="!text-red-700 dark:!text-red-400"
                 disabled={measurements.length === 0}
                 onClick={() => setConfirmAction('deleteAllWater')}
               >
@@ -438,7 +440,7 @@ export default function SettingsPage() {
             )}
 
             {confirmAction === 'resetEverything' ? (
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex w-full flex-wrap items-center gap-2">
                 <span className="text-sm text-red-800 dark:text-red-300">
                   Clear all stored data — settings, saved locations and every water
                   record? This cannot be undone.
@@ -463,8 +465,8 @@ export default function SettingsPage() {
               </div>
             ) : (
               <Button
-                variant="danger"
                 size="sm"
+                className="!text-red-700 dark:!text-red-400"
                 onClick={() => setConfirmAction('resetEverything')}
               >
                 <RotateCcw className="h-4 w-4" aria-hidden />
