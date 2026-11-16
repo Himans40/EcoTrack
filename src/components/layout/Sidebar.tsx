@@ -1,65 +1,90 @@
 import { NavLink } from 'react-router-dom'
-import { Leaf, X } from 'lucide-react'
-import { NAV_ITEMS } from './navItems'
+import { X } from 'lucide-react'
+import { NAV_GROUPS, NAV_ITEMS } from './navItems'
+import { BrandMark } from './BrandMark'
 
 function navLinkClasses({ isActive }: { isActive: boolean }): string {
   const base =
-    'flex items-start gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors'
+    'group relative flex items-center gap-3 rounded-md px-3 py-2 text-[14px] transition-colors'
   return isActive
-    ? `${base} bg-brand-50 text-brand-800 dark:bg-brand-500/15 dark:text-brand-300`
-    : `${base} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100`
+    ? `${base} bg-slate-100 font-medium text-slate-900 dark:bg-slate-800/70 dark:text-white`
+    : `${base} text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100`
 }
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <nav aria-label="Main navigation" className="flex h-full flex-col gap-1 p-3">
-      {NAV_ITEMS.map((item) => {
-        const Icon = item.icon
-        return (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            onClick={onNavigate}
-            className={navLinkClasses}
-          >
-            <Icon className="mt-0.5 h-[18px] w-[18px] shrink-0" aria-hidden />
-            <span className="min-w-0">
-              <span className="block">{item.label}</span>
-              <span className="mt-0.5 block text-xs font-normal leading-snug text-slate-500 dark:text-slate-400">
-                {item.description}
-              </span>
-            </span>
-          </NavLink>
-        )
-      })}
+    <nav aria-label="Main navigation" className="flex flex-col gap-6 px-3 py-4">
+      {NAV_GROUPS.map((group) => (
+        <div key={group.key}>
+          <p className="mb-1.5 px-3 text-xs font-medium text-slate-400 dark:text-slate-500">
+            {group.label}
+          </p>
+          <ul className="space-y-0.5">
+            {NAV_ITEMS.filter((item) => item.group === group.key).map((item) => {
+              const Icon = item.icon
+              return (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    end={item.to === '/'}
+                    onClick={onNavigate}
+                    title={item.description}
+                    className={navLinkClasses}
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <span
+                          aria-hidden
+                          className={`absolute -left-3 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-brand-600 transition-opacity dark:bg-brand-400 ${isActive ? 'opacity-100' : 'opacity-0'}`}
+                        />
+                        <Icon
+                          className={`h-4 w-4 shrink-0 ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300'}`}
+                          strokeWidth={1.75}
+                          aria-hidden
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </>
+                    )}
+                  </NavLink>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      ))}
     </nav>
+  )
+}
+
+function Wordmark() {
+  return (
+    <span className="flex items-center gap-2.5">
+      <BrandMark className="h-7 w-7 text-brand-600 dark:text-brand-400" />
+      <span className="leading-none">
+        <span className="block text-[15px] font-semibold tracking-tight text-slate-900 dark:text-white">
+          EcoTrack
+        </span>
+        <span className="mt-1 block text-[11px] text-slate-500 dark:text-slate-400">
+          Air &amp; water monitor
+        </span>
+      </span>
+    </span>
   )
 }
 
 /** Fixed sidebar, visible from the `lg` breakpoint upward. */
 export function Sidebar() {
   return (
-    <aside className="hidden w-72 shrink-0 border-r border-slate-200 bg-white lg:flex lg:flex-col dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex items-center gap-2.5 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
-        <span className="rounded-lg bg-brand-600 p-1.5 text-white">
-          <Leaf className="h-5 w-5" aria-hidden />
-        </span>
-        <span>
-          <span className="block text-sm font-bold leading-tight text-slate-900 dark:text-slate-100">
-            Environment Monitor
-          </span>
-          <span className="block text-xs text-slate-500 dark:text-slate-400">
-            Air &amp; Water Quality Index
-          </span>
-        </span>
+    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-slate-200 bg-white lg:flex lg:flex-col dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex h-[61px] items-center px-5">
+        <Wordmark />
       </div>
       <div className="flex-1 overflow-y-auto">
         <SidebarContent />
       </div>
-      <footer className="border-t border-slate-200 px-5 py-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-        <p className="font-medium text-slate-600 dark:text-slate-300">Major Project</p>
-        <p className="mt-0.5">Shambhavi · Rameez Rahman · Himanshu</p>
+      <footer className="border-t border-slate-100 px-5 py-4 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+        <p className="font-medium text-slate-700 dark:text-slate-300">Major project</p>
+        <p className="mt-1 leading-relaxed">Shambhavi, Rameez Rahman and Himanshu</p>
       </footer>
     </aside>
   )
@@ -80,28 +105,21 @@ export function MobileSidebar({
         type="button"
         aria-label="Close navigation menu"
         onClick={onClose}
-        className="absolute inset-0 bg-slate-900/50"
+        className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]"
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
-        className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-white shadow-xl dark:bg-slate-900"
+        className="drawer-in absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
       >
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4 dark:border-slate-800">
-          <span className="flex items-center gap-2.5">
-            <span className="rounded-lg bg-brand-600 p-1.5 text-white">
-              <Leaf className="h-5 w-5" aria-hidden />
-            </span>
-            <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              Environment Monitor
-            </span>
-          </span>
+        <div className="flex h-[61px] items-center justify-between px-5">
+          <Wordmark />
           <button
             type="button"
             onClick={onClose}
             aria-label="Close navigation menu"
-            className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="-mr-2 rounded-md p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <X className="h-5 w-5" aria-hidden />
           </button>
