@@ -5,8 +5,12 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CornerDownLeft, Search } from 'lucide-react'
+import { CornerDownLeft, MapPin, Monitor, Moon, RefreshCw, Search, Sun } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useLocations } from '@/context/LocationContext'
+import { useSettings } from '@/context/SettingsContext'
+import { useEnvironment } from '@/context/EnvironmentDataContext'
+import { formatLocationName } from '@/lib/format'
 import { NAV_ITEMS } from './navItems'
 
 export interface Command {
@@ -41,20 +45,40 @@ export function useCommandMenuShortcut(open: () => void) {
 
 export function CommandMenu({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate()
+  const { savedLocations, activeLocation, selectLocation } = useLocations()
+  const { updateSettings } = useSettings()
+  const { refresh } = useEnvironment()
   const [query, setQuery] = useState('')
   const [activeIndex, setActiveIndex] = useState(0)
 
-  const commands = useMemo<Command[]>(
-    () =>
-      NAV_ITEMS.map((item) => ({
-        id: `page-${item.to}`,
-        label: `Go to ${item.label}`,
-        group: 'Pages',
-        icon: item.icon,
-        run: () => navigate(item.to),
-      })),
-    [navigate],
-  )
+  const commands = useMemo<Command[]>(() => {
+    const pages: Command[] = NAV_ITEMS.map((item) => ({
+      id: `page-${item.to}`,
+      label: `Go to ${item.label}`,
+      group: 'Pages',
+      icon: item.icon,
+      run: () => navigate(item.to),
+    }))
+
+    const cities: Command[] = savedLocations
+      .filter((location) => location.id !== activeLocation.id)
+      .map((location) => ({
+        id: `city-${location.id}`,
+        label: `Switch to ${formatLocationName(location)}`,
+        group: 'Saved cities',
+        icon: MapPin,
+        run: () => selectLocation(location),
+      }))
+
+    const actions: Command[] = [
+      { id: 'action-refresh', label: 'Refresh data', group: 'Actions', icon: RefreshCw, run: refresh },
+      { id: 'theme-light', label: 'Use light theme', group: 'Actions', icon: Sun, run: () => updateSettings({ theme: 'light' }) },
+      { id: 'theme-dark', label: 'Use dark theme', group: 'Actions', icon: Moon, run: () => updateSettings({ theme: 'dark' }) },
+      { id: 'theme-system', label: 'Use system theme', group: 'Actions', icon: Monitor, run: () => updateSettings({ theme: 'system' }) },
+    ]
+
+    return [...pages, ...cities, ...actions]
+  }, [navigate, savedLocations, activeLocation.id, selectLocation, refresh, updateSettings])
 
   const results = filterCommands(commands, query)
 
@@ -103,7 +127,7 @@ export function CommandMenu({ onClose }: { onClose: () => void }) {
               setActiveIndex(0)
             }}
             onKeyDown={onKeyDown}
-            placeholder="Search pages and actions"
+            placeholder="Search pages, cities and actions"
             aria-label="Search commands"
             role="combobox"
             aria-expanded="true"
