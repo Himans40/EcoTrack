@@ -6,9 +6,13 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { MapPin, Search, X } from 'lucide-react'
+import { LocateFixed, MapPin, Search, X } from 'lucide-react'
 import type { GeoLocation } from '@/types'
-import { searchLocations } from '@/services/geocoding'
+import {
+  getDevicePosition,
+  locationFromCoordinates,
+  searchLocations,
+} from '@/services/geocoding'
 import { ApiError, isAbortError } from '@/services/http'
 import { formatCoordinates, formatLocationName } from '@/lib/format'
 import { Button, Spinner } from './ui'
@@ -29,6 +33,21 @@ export function LocationSearch({
   const [isSearching, setIsSearching] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
+  const [isLocating, setIsLocating] = useState(false)
+
+  /** Use the browser's position, name it, and hand it to the parent. */
+  const useMyLocation = async () => {
+    setIsLocating(true)
+    setError(null)
+    try {
+      const { latitude, longitude } = await getDevicePosition()
+      onSelect(await locationFromCoordinates(latitude, longitude))
+    } catch (caught) {
+      setError((caught as Error).message)
+    } finally {
+      setIsLocating(false)
+    }
+  }
 
   const runSearch = useCallback(async (term: string) => {
     abortRef.current?.abort()
@@ -74,6 +93,18 @@ export function LocationSearch({
 
   return (
     <div className="flex flex-col gap-3">
+      <Button
+        variant="secondary"
+        onClick={() => void useMyLocation()}
+        isLoading={isLocating}
+        className="justify-start"
+      >
+        {!isLocating ? (
+          <LocateFixed className="h-4 w-4 text-brand-600 dark:text-brand-400" aria-hidden />
+        ) : null}
+        {isLocating ? 'Finding your location…' : 'Use my current location'}
+      </Button>
+
       <div className="relative">
         <Search
           className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
@@ -120,6 +151,7 @@ export function LocationSearch({
             variant="ghost"
             className="ml-2"
             onClick={() => void runSearch(query.trim())}
+            hidden={query.trim().length < 2}
           >
             Retry
           </Button>

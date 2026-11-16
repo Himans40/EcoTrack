@@ -158,3 +158,68 @@ export const DEFAULT_LOCATIONS: GeoLocation[] = [
 
 /** The location shown on first launch, before the user picks one. */
 export const FALLBACK_LOCATION: GeoLocation = DEFAULT_LOCATIONS[0]
+
+/* -------------------------------------------------------------------------- */
+/*  "Use my location"                                                         */
+/* -------------------------------------------------------------------------- */
+
+const REVERSE_GEOCODING_BASE = 'https://api.bigdatacloud.net/data/reverse-geocode-client'
+
+/** Ask the browser for the device's position. Rejects with a readable message. */
+export function getDevicePosition(): Promise<{ latitude: number; longitude: number }> {
+  return new Promise((resolve, reject) => {
+    if (!('geolocation' in navigator)) {
+      reject(new Error('This browser cannot share its location.'))
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) =>
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        }),
+      (error) =>
+        reject(
+          new Error(
+            error.code === error.PERMISSION_DENIED
+              ? 'Location access was blocked. Allow it in the browser to use this.'
+              : 'Your location could not be found. Try searching instead.',
+          ),
+        ),
+      { timeout: 10_000, maximumAge: 5 * 60_000 },
+    )
+  })
+}
+
+/**
+ * Turn coordinates into a named location. If the lookup fails we still
+ * return a usable location called "My location".
+ */
+export async function locationFromCoordinates(
+  latitude: number,
+  longitude: number,
+): Promise<GeoLocation> {
+  const location: GeoLocation = {
+    id: `geo-${latitude.toFixed(3)}-${longitude.toFixed(3)}`,
+    name: 'My location',
+    latitude,
+    longitude,
+  }
+  try {
+    const query = buildQuery({ latitude, longitude, localityLanguage: 'en' })
+    const place = await fetchJson<{
+      city?: string
+      locality?: string
+      principalSubdivision?: string
+      countryName?: string
+      countryCode?: string
+    }>(`${REVERSE_GEOCODING_BASE}?${query}`, { timeoutMs: 6_000 })
+    location.name = place.city || place.locality || location.name
+    location.admin1 = place.principalSubdivision || undefined
+    location.country = place.countryName || undefined
+    location.countryCode = place.countryCode || undefined
+  } catch {
+    // Keep the generic name; the coordinates are what matter for the data.
+  }
+  return location
+}
