@@ -215,3 +215,43 @@ describe('API failure handling', () => {
     expect(screen.getAllByText('Demonstration data').length).toBeGreaterThan(0)
   }, 20_000)
 })
+
+describe('newer features', () => {
+  it('opens the command menu with Ctrl+K and navigates from it', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await screen.findByRole('heading', { name: /environmental overview/i })
+
+    await user.keyboard('{Control>}k{/Control}')
+    const search = await screen.findByRole('combobox', { name: /search commands/i })
+    await user.type(search, 'water quality')
+    await user.keyboard('{Enter}')
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /water quality monitoring/i }),
+    ).toBeInTheDocument()
+  }, 20_000)
+
+  it('shows the AQI alert banner above the default threshold of 150', async () => {
+    render(<App />)
+    // The fixture AQI is 162.
+    expect(await screen.findByText(/above your alert level of 150/i)).toBeInTheDocument()
+  })
+
+  it('renders the Compare Cities page from the sidebar', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    const nav = screen.getAllByRole('navigation', { name: /main navigation/i })[0]
+    await user.click(within(nav).getByRole('link', { name: /compare cities/i }))
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /compare cities/i }),
+    ).toBeInTheDocument()
+  }, 20_000)
+
+  it('renders the printable report', async () => {
+    window.history.pushState({}, '', '/report')
+    render(<App />)
+    expect(await screen.findByRole('button', { name: /print or save as pdf/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: /air quality/i })).toBeInTheDocument()
+  })
+})
