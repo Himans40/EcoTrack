@@ -9,13 +9,11 @@ import {
   MapPin,
   Thermometer,
   Waves,
-  Wind,
 } from 'lucide-react'
 import { useEnvironment } from '@/context/EnvironmentDataContext'
 import { useLocations } from '@/context/LocationContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useWaterMeasurements } from '@/context/WaterContext'
-import { AqiAdvice, AqiGauge, AqiScaleStrip } from '@/components/air'
 import { AqiReading } from '@/components/air/AqiReading'
 import { AqiTrendChart } from '@/components/charts'
 import { PageHeader, StatCard } from '@/components/StatCard'
@@ -172,44 +170,8 @@ export default function OverviewPage() {
         )}
       </div>
 
-      {/* AQI detail + weather */}
+      {/* Trend + observations */}
       <div className="grid gap-5 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
-          <CardHeader
-            title="Current Air Quality"
-            icon={<Wind className="h-4 w-4" aria-hidden />}
-            subtitle={
-              airQuality?.current.observedAt
-                ? `Observation hour ${formatDateTime(airQuality.current.observedAt)} (local time at the location)`
-                : undefined
-            }
-          />
-          <CardBody className="space-y-5">
-            {isLoading ? (
-              <SkeletonBlock className="h-56" />
-            ) : airQuality ? (
-              <>
-                <AqiGauge aqi={airQuality.current.usAqi} />
-                <AqiScaleStrip aqi={airQuality.current.usAqi} />
-                {dominantMeta ? (
-                  <p className="rounded-lg bg-slate-100 px-3 py-2.5 text-xs leading-relaxed text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
-                    <span className="font-semibold">Dominant pollutant:</span>{' '}
-                    {dominantMeta.label} ({dominantMeta.formula}). This pollutant has
-                    the highest EPA sub-index right now, so it is the one setting the
-                    overall AQI.
-                  </p>
-                ) : null}
-              </>
-            ) : (
-              <EmptyState
-                title="Air quality unavailable"
-                description="No air quality reading could be loaded for this location."
-              />
-            )}
-          </CardBody>
-          {airQuality ? <ProvenanceFooter provenance={airQuality.provenance} /> : null}
-        </Card>
-
         <Card className="lg:col-span-2">
           <CardHeader
             title="Air Quality Trend"
@@ -236,17 +198,40 @@ export default function OverviewPage() {
               />
             )}
           </CardBody>
-          {airQuality ? (
-            <div className="border-t border-slate-200 px-5 py-4 dark:border-slate-800">
-              <AqiAdvice aqi={airQuality.current.usAqi} />
-            </div>
-          ) : null}
+          {airQuality ? <ProvenanceFooter provenance={airQuality.provenance} /> : null}
+        </Card>
+        <Card>
+          <CardHeader title="Environmental Observations" />
+          <CardBody>
+            <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
+              {buildObservations({
+                aqi: airQuality?.current.usAqi ?? null,
+                dominantLabel: dominantMeta?.shortLabel ?? null,
+                temperatureC: weather?.current.temperatureC ?? null,
+                humidity: weather?.current.relativeHumidity ?? null,
+                waterConcerns: latestWaterAssessment?.concerns.length ?? null,
+                sampleCount: measurements.length,
+              }).map((observation) => (
+                <li key={observation} className="flex gap-2.5">
+                  <span
+                    className="mt-2 h-1 w-3 shrink-0 rounded-full bg-brand-500"
+                    aria-hidden
+                  />
+                  <span className="leading-relaxed">{observation}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              {lastUpdatedAt
+                ? `Data last loaded ${formatRelativeTime(lastUpdatedAt)}.`
+                : 'Data has not loaded yet.'}
+            </p>
+          </CardBody>
         </Card>
       </div>
 
-      {/* Water summary + observations */}
-      <div className="grid gap-5 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      {/* Water summary */}
+        <Card>
           <CardHeader
             title="Water Quality Summary"
             icon={<Droplets className="h-4 w-4" aria-hidden />}
@@ -291,9 +276,9 @@ export default function OverviewPage() {
                   {latestWaterAssessment.parameters.map((parameter) => (
                     <div
                       key={parameter.key}
-                      className="rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-800"
+                      className="rounded-md bg-slate-50 px-3 py-2.5 dark:bg-slate-800/40"
                     >
-                      <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         {parameter.label}
                       </p>
                       <p className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -344,35 +329,6 @@ export default function OverviewPage() {
           </CardBody>
         </Card>
 
-        <Card>
-          <CardHeader title="Environmental Observations" />
-          <CardBody>
-            <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
-              {buildObservations({
-                aqi: airQuality?.current.usAqi ?? null,
-                dominantLabel: dominantMeta?.shortLabel ?? null,
-                temperatureC: weather?.current.temperatureC ?? null,
-                humidity: weather?.current.relativeHumidity ?? null,
-                waterConcerns: latestWaterAssessment?.concerns.length ?? null,
-                sampleCount: measurements.length,
-              }).map((observation) => (
-                <li key={observation} className="flex gap-2.5">
-                  <span
-                    className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500"
-                    aria-hidden
-                  />
-                  <span className="leading-relaxed">{observation}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 border-t border-slate-200 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-              {lastUpdatedAt
-                ? `Data last loaded ${formatRelativeTime(lastUpdatedAt)}.`
-                : 'Data has not loaded yet.'}
-            </p>
-          </CardBody>
-        </Card>
-      </div>
     </div>
   )
 }
