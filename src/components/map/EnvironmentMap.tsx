@@ -42,7 +42,7 @@ function buildPinIcon(color: string, label: string, isActive: boolean): L.DivIco
         display:flex;align-items:center;justify-content:center;
         color:#ffffff;font-weight:700;
         font-size:${isActive ? 13 : 11}px;
-        font-family:Inter,system-ui,sans-serif;
+        font-family:'Schibsted Grotesk',system-ui,sans-serif;
       ">${label}</div>
     `,
     iconSize: [size, size],
@@ -92,6 +92,7 @@ export function EnvironmentMap({
   airQuality,
   waterMeasurements,
   onSelectLocation,
+  otherCityAqi = {},
   height = 520,
 }: {
   activeLocation: GeoLocation
@@ -99,6 +100,8 @@ export function EnvironmentMap({
   airQuality: AirQualityDataset | null
   waterMeasurements: WaterMeasurement[]
   onSelectLocation: (location: GeoLocation) => void
+  /** Current AQI for the other saved cities, keyed by location id. */
+  otherCityAqi?: Record<string, number | null>
   height?: number
 }) {
   const activeAqi = airQuality?.current.usAqi ?? null
@@ -164,22 +167,30 @@ export function EnvironmentMap({
           </Popup>
         </Marker>
 
-        {/* Other saved locations — AQI is not fetched for these, so no value
-            is shown rather than a guessed one. */}
+        {/* Other saved locations — coloured by their own AQI when it loaded,
+            otherwise a neutral pin rather than a guessed value. */}
         {savedLocations
           .filter((location) => location.id !== activeLocation.id)
-          .map((location) => (
+          .map((location) => {
+            const aqi = otherCityAqi[location.id] ?? null
+            const category = getAqiCategory(aqi)
+            return (
             <Marker
               key={location.id}
               position={[location.latitude, location.longitude]}
-              icon={buildPinIcon('#8f9c95', '•', false)}
+              icon={buildPinIcon(
+                category?.hex ?? '#8f9c95',
+                aqi !== null ? String(Math.round(aqi)) : '•',
+                false,
+              )}
             >
               <Popup>
                 <strong>{formatLocationName(location)}</strong>
                 <br />
                 <span style={{ fontSize: '0.75rem' }}>
-                  Saved location. Air quality is only fetched for the active
-                  location.
+                  {aqi !== null
+                    ? `US AQI ${Math.round(aqi)} — ${category?.label}`
+                    : 'Air quality could not be loaded for this city.'}
                 </span>
                 <br />
                 <button
@@ -201,7 +212,8 @@ export function EnvironmentMap({
                 </button>
               </Popup>
             </Marker>
-          ))}
+            )
+          })}
 
         {/* Water sampling points */}
         {mappableWater.map((measurement) => {

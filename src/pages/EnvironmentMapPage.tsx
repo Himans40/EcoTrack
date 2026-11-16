@@ -5,6 +5,7 @@
 import { lazy, Suspense } from 'react'
 import { Droplets, Info, MapPin, Wind } from 'lucide-react'
 import { useEnvironment } from '@/context/EnvironmentDataContext'
+import { useCityComparison } from '@/hooks/useCityComparison'
 import { useLocations } from '@/context/LocationContext'
 import { useWaterMeasurements } from '@/context/WaterContext'
 import { PageHeader } from '@/components/StatCard'
@@ -35,6 +36,11 @@ export default function EnvironmentMapPage() {
   const { activeLocation, savedLocations, selectLocation } = useLocations()
   const { measurements } = useWaterMeasurements()
   const { airQuality, isDemoMode } = useEnvironment()
+  const { rows } = useCityComparison(savedLocations)
+  // Map each saved city's id to its current AQI, for colouring its pin.
+  const otherCityAqi = Object.fromEntries(
+    rows.map((row) => [row.location.id, row.data?.current.usAqi ?? null]),
+  )
 
   const mappableWater = measurements.filter(
     (m) => typeof m.latitude === 'number' && typeof m.longitude === 'number',
@@ -51,16 +57,16 @@ export default function EnvironmentMapPage() {
 
       {isDemoMode ? <DemoDataBanner /> : null}
 
-      <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-start gap-3 border-l-2 border-slate-300 py-1 pl-4 text-[13px] dark:border-slate-700">
         <Info
           className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500"
           aria-hidden
         />
-        <p className="leading-relaxed text-slate-600 dark:text-slate-300">
+        <p className="max-w-4xl leading-relaxed text-slate-600 dark:text-slate-300">
           Only points this application can actually verify are drawn: geocoded city
           coordinates, and water samples where you supplied coordinates yourself.
-          No fictional monitoring stations are placed on the map. Air quality is
-          fetched for the active location only, so other saved locations show a
+          No fictional monitoring stations are placed on the map. Every saved city is
+          coloured by its own live AQI; if a city's data cannot be loaded it shows a
           neutral pin rather than a guessed value.
         </p>
       </div>
@@ -79,6 +85,7 @@ export default function EnvironmentMapPage() {
               airQuality={airQuality}
               waterMeasurements={measurements}
               onSelectLocation={selectLocation}
+              otherCityAqi={otherCityAqi}
             />
           </Suspense>
           <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
