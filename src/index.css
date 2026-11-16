@@ -204,3 +204,10 @@
 .dark .leaflet-tile-pane {
   filter: invert(1) hue-rotate(180deg) saturate(0.35) brightness(0.85) contrast(0.9);
 }
+
+/* Keep long-form reading text to a comfortable line length. */
+.prose-section > p,
+.prose-section > ul,
+.prose-section > h3 {
+  max-width: 72ch;
+}

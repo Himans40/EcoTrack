@@ -43,7 +43,7 @@ export default function EducationPage() {
       <div
         role="tablist"
         aria-label="Education topics"
-        className="flex flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-1.5 dark:border-slate-800 dark:bg-slate-900"
+        className="flex flex-wrap gap-x-6 border-b border-slate-200 dark:border-slate-800"
       >
         {TABS.map((tab) => {
           const Icon = tab.icon
@@ -57,10 +57,10 @@ export default function EducationPage() {
               aria-selected={isActive}
               aria-controls={`panel-${tab.id}`}
               onClick={() => setActiveTab(tab.id)}
-              className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              className={`-mb-px inline-flex items-center gap-2 border-b-2 py-3 text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-brand-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                  ? 'border-brand-600 text-slate-900 dark:border-brand-400 dark:text-white'
+                  : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
             >
               <Icon className="h-4 w-4" aria-hidden />
@@ -141,7 +141,7 @@ function AqiPanel() {
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               {AQI_CATEGORIES.map((category) => (
                 <tr key={category.key}>
-                  <td className="table-cell font-mono text-xs">
+                  <td className="table-cell text-[13px]">
                     {category.range[0]}–{category.range[1]}
                   </td>
                   <td className="table-cell">

@@ -5,7 +5,7 @@
  * from RFC 4180 are short, and this keeps the dependency list honest.
  */
 
-import type { WaterMeasurement } from '@/types'
+import type { AirQualityHourlyPoint, WaterMeasurement } from '@/types'
 import { assessWaterMeasurement, WATER_SOURCE_LABELS } from './wqi'
 
 /**
@@ -93,6 +93,33 @@ export function waterMeasurementsToCsv(measurements: WaterMeasurement[]): string
 
   // Trailing newline so the file ends cleanly in editors and shells.
   return `${lines.join('\r\n')}\r\n`
+}
+
+/** Hourly AQI and pollutant history as CSV, one row per hour. */
+export function airHistoryToCsv(points: AirQualityHourlyPoint[]): string {
+  const header = toCsvRow([
+    'Time (local)',
+    'US AQI',
+    'PM2.5 (µg/m³)',
+    'PM10 (µg/m³)',
+    'O3 (µg/m³)',
+    'NO2 (µg/m³)',
+    'SO2 (µg/m³)',
+    'CO (µg/m³)',
+  ])
+  const rows = points.map((point) =>
+    toCsvRow([
+      point.time,
+      point.usAqi ?? '',
+      point.pm2_5 ?? '',
+      point.pm10 ?? '',
+      point.ozone ?? '',
+      point.nitrogen_dioxide ?? '',
+      point.sulphur_dioxide ?? '',
+      point.carbon_monoxide ?? '',
+    ]),
+  )
+  return `${[header, ...rows].join('\r\n')}\r\n`
 }
 
 /** Trigger a browser download for generated text content. */

@@ -7,7 +7,7 @@
  */
 
 import { useMemo } from 'react'
-import { Droplets, LineChart as LineChartIcon, Thermometer, Wind } from 'lucide-react'
+import { Download, Droplets, LineChart as LineChartIcon, Thermometer, Wind } from 'lucide-react'
 import type { AirQualityHourlyPoint } from '@/types'
 import { useEnvironment } from '@/context/EnvironmentDataContext'
 import { useSettings, HISTORY_WINDOW_OPTIONS } from '@/context/SettingsContext'
@@ -21,6 +21,7 @@ import {
 } from '@/components/charts'
 import { PageHeader, StatCard } from '@/components/StatCard'
 import {
+  Button,
   Card,
   CardBody,
   CardHeader,
@@ -31,6 +32,7 @@ import {
   SkeletonBlock,
 } from '@/components/ui'
 import { getAqiCategory } from '@/lib/aqi'
+import { airHistoryToCsv, buildExportFilename, downloadTextFile } from '@/lib/csv'
 import { averageWaterScore, describeMeasurementOrigin } from '@/lib/wqi'
 import { formatDateTime, formatLocationName, formatTemperature } from '@/lib/format'
 
@@ -112,22 +114,38 @@ export default function AnalyticsPage() {
           </>
         }
         actions={
-          <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-            <span className="whitespace-nowrap">Air &amp; weather period</span>
-            <select
-              value={settings.historyWindowHours}
-              onChange={(event) =>
-                updateSettings({ historyWindowHours: Number(event.target.value) })
+          <>
+            <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+              <span className="whitespace-nowrap">Air &amp; weather period</span>
+              <select
+                value={settings.historyWindowHours}
+                onChange={(event) =>
+                  updateSettings({ historyWindowHours: Number(event.target.value) })
+                }
+                className="field-input w-auto py-1.5 text-xs"
+              >
+                {HISTORY_WINDOW_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button
+              size="sm"
+              disabled={!airQuality || airQuality.hourly.length === 0}
+              onClick={() =>
+                airQuality &&
+                downloadTextFile(
+                  buildExportFilename(`aqi-history-${activeLocation.name.toLowerCase()}`),
+                  airHistoryToCsv(airQuality.hourly),
+                )
               }
-              className="field-input w-auto py-1.5 text-xs"
             >
-              {HISTORY_WINDOW_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+              <Download className="h-3.5 w-3.5" aria-hidden />
+              Export CSV
+            </Button>
+          </>
         }
       />
 
