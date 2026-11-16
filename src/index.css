@@ -193,3 +193,14 @@
     background: #ffffff !important;
   }
 }
+
+/* Mute the OpenStreetMap tiles so the AQI markers carry the colour, and turn
+   them into a dark map in dark mode. Only the tile layer is filtered, so the
+   markers keep their true category colours. */
+.leaflet-tile-pane {
+  filter: saturate(0.45) contrast(0.95);
+}
+
+.dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) saturate(0.35) brightness(0.85) contrast(0.9);
+}
