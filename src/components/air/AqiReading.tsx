@@ -72,11 +72,43 @@ export function AqiReading({
  * Bars for each of the last 24 hours. Heights use a fixed 0-300 scale (or the
  * peak, if higher) so the same AQI looks the same height for every city.
  */
-function HourStrip({ points }: { points: AirQualityHourlyPoint[] }) {
+export function HourStrip({
+  points,
+  compact = false,
+}: {
+  points: AirQualityHourlyPoint[]
+  /** Compact strips are short and have no captions, for use inside tables. */
+  compact?: boolean
+}) {
   if (points.length === 0) return null
 
   const highest = Math.max(...points.map((point) => point.usAqi ?? 0))
   const scaleTop = Math.max(300, highest)
+
+  const bars = (
+    <div className={`flex items-end ${compact ? 'h-8 gap-[2px]' : 'h-24 gap-[3px]'}`} role="list">
+      {points.map((point) => {
+        const value = point.usAqi ?? 0
+        const category = getAqiCategory(value)
+        const label = `${formatHour(point.time)}: AQI ${Math.round(value)}, ${category?.label ?? ''}`
+        return (
+          <div
+            key={point.time}
+            role="listitem"
+            aria-label={label}
+            title={label}
+            className="flex-1 rounded-[2px] transition-opacity hover:opacity-70"
+            style={{
+              height: `${Math.max(4, (value / scaleTop) * 100)}%`,
+              backgroundColor: category?.hex ?? '#8f9c95',
+            }}
+          />
+        )
+      })}
+    </div>
+  )
+
+  if (compact) return bars
 
   return (
     <figure>
@@ -84,26 +116,7 @@ function HourStrip({ points }: { points: AirQualityHourlyPoint[] }) {
         <span>Last {points.length} hours</span>
         <span>Peak {Math.round(highest)}</span>
       </figcaption>
-      <div className="flex h-24 items-end gap-[3px]" role="list">
-        {points.map((point) => {
-          const value = point.usAqi ?? 0
-          const category = getAqiCategory(value)
-          const label = `${formatHour(point.time)}: AQI ${Math.round(value)}, ${category?.label ?? ''}`
-          return (
-            <div
-              key={point.time}
-              role="listitem"
-              aria-label={label}
-              title={label}
-              className="flex-1 rounded-[2px] transition-opacity hover:opacity-70"
-              style={{
-                height: `${Math.max(4, (value / scaleTop) * 100)}%`,
-                backgroundColor: category?.hex ?? '#8f9c95',
-              }}
-            />
-          )
-        })}
-      </div>
+      {bars}
       <div className="mt-2 flex justify-between text-[11px] text-slate-400 dark:text-slate-500">
         <span>{formatHour(points[0].time)}</span>
         <span>{formatHour(points[Math.floor(points.length / 2)].time)}</span>

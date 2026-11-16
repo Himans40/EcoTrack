@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   LineChart,
   Map,
+  Scale,
   Settings,
   Wind,
 } from 'lucide-react'
@@ -62,6 +63,13 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Historical Analytics',
     icon: LineChart,
     description: 'Air and water trends over time',
+    group: 'review',
+  },
+  {
+    to: '/compare',
+    label: 'Compare Cities',
+    icon: Scale,
+    description: 'Saved cities ranked by AQI',
     group: 'review',
   },
   {
