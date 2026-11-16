@@ -120,8 +120,9 @@ Measurement history, trends and sample comparison:
 ## Features
 
 ### A — Environmental overview dashboard
-Current AQI with category and dominant pollutant, temperature, humidity, wind and
-precipitation, a 72-hour AQI trend, a water quality summary of the most recent
+A large headline AQI reading coloured by its EPA category, with a 24-hour strip of
+hourly readings beneath it, temperature, humidity, wind and precipitation, a 72-hour
+AQI trend, a water quality summary of the most recent
 sample, plain-language environmental observations derived strictly from the values
 on screen, and data-freshness indicators on every card.
 
@@ -135,6 +136,7 @@ on screen, and data-freshness indicators on every card.
   sub-index — so the arithmetic can be checked
 - Full EPA category reference table with the current category highlighted
 - Explicit statements of the index standard, measurement confidence and freshness
+- **Next-24-hour forecast** with the best time to be outside and the worst expected hour
 
 ### C — Water quality monitoring
 - Record pH, turbidity (NTU), dissolved oxygen (mg/L), TDS (mg/L), electrical
@@ -147,23 +149,26 @@ on screen, and data-freshness indicators on every card.
 - Trend chart for any parameter or for the composite score
 - Sample comparison: highest and lowest scoring samples
 - CSV export (RFC 4180 compliant, with a spreadsheet-injection guard)
+- **Live score preview** in the entry form, updated as each value is typed
 - Local persistence; records survive a browser restart
+- **Saved to the backend** as well whenever the EcoTrack server is running, with an
+  indicator showing where records are currently being saved
 
 ### D — Interactive environmental map
-Leaflet map on OpenStreetMap tiles. Round pins mark monitoring locations, coloured
-by the AQI actually fetched for them; diamond pins mark water samples, coloured by
+Leaflet map on OpenStreetMap tiles (muted, with a dark version in dark mode). Round
+pins mark every saved city, each coloured by its own live AQI; diamond pins mark water samples, coloured by
 their composite score. Only verifiable points are drawn.
 
 ### E — Historical analytics
 AQI over time, PM2.5 and PM10 trends, temperature and humidity, and water pH,
 turbidity and dissolved oxygen trends. Minimum, maximum and mean are computed over
 exactly the points plotted, with the hour count shown. The time period is
-selectable from 24 hours to 7 days.
+selectable from 24 hours to 7 days, and the hourly AQI history can be exported as CSV.
 
 ### F — Location search
-Debounced, abortable city search over the Open-Meteo geocoding API, with saved
-locations, a location switcher, and handling for short queries, no matches and
-request failures.
+Debounced, abortable city search over the Open-Meteo geocoding API, a **"Use my
+current location"** button, saved locations, a location switcher, and handling for
+short queries, no matches and request failures.
 
 ### G — Environmental education
 Four tabbed sections: AQI categories and how an index is actually built, the six
@@ -172,9 +177,30 @@ plainly — what they cannot tell you, and practical pollution reduction measure
 
 ### H — Settings
 Light / dark / system theme, temperature unit, auto-refresh interval, chart history
-window, preferred location, local data management (export, load and reset
+window, **AQI alert threshold**, preferred location, backend sync status and server
+statistics, data management (export, load and reset
 demonstration data, delete records, clear all local data), and a full data-source
 and index-standard reference.
+
+### I — Compare cities
+Every saved city ranked from cleanest to most polluted air, each with its AQI,
+category, main pollutant, a bar on a fixed 0–300 scale and a 24-hour strip.
+
+### J — AQI alerts
+Choose a threshold in Settings (an EPA category boundary). While the active city's
+AQI is above it, a banner appears at the top of every page.
+
+### K — Command menu
+Press **Ctrl+K** (⌘K on a Mac) to jump to any page, switch city, refresh data,
+change theme or open the report — all from the keyboard.
+
+### L — Printable report
+A one-page summary of air, forecast, weather and water samples for the active city,
+ready to print or save as PDF.
+
+### M — Backend (Express + SQLite)
+A small REST API in `backend/` stores water samples in a SQLite database and serves
+summary statistics. The web app works without it and syncs to it when it is running.
 
 ---
 
@@ -213,16 +239,18 @@ Three rules follow from this, and the application keeps all three:
 | Language | TypeScript 5.7 (strict) | Catches unit and null errors at compile time |
 | Build tool | Vite 7 | Fast dev server, small optimised production build |
 | Styling | Tailwind CSS 3 | Consistent design tokens, class-based dark mode |
-| Routing | React Router 7 | Client-side routing for the seven pages |
+| Routing | React Router 7 | Client-side routing for the nine pages |
 | Charts | Recharts 2 | Declarative, responsive, composes with React |
 | Map | Leaflet 1.9 + React Leaflet 4 | Open-source mapping on OpenStreetMap tiles |
 | Icons | Lucide React | Clean, consistent icon set |
-| Persistence | Browser `localStorage` | No backend needed; data stays on the user's device |
+| Persistence | Browser `localStorage` | Works offline; data stays on the user's device |
+| Backend | Express 4 + Prisma 6 + SQLite | Optional server copy of water samples; zero-setup database file |
 | Testing | Vitest 4 + React Testing Library | Same transform pipeline as the app |
 
-**No backend.** The application talks directly to public, key-less APIs and stores
-user data locally. A server would add deployment complexity without enabling any
-feature this project needs.
+**Optional backend.** The web app talks directly to public, key-less APIs and keeps
+user data in the browser, so it runs on its own. The Express backend in `backend/`
+adds a server copy of water samples. It uses SQLite, so there is no database server
+to install.
 
 ---
 
@@ -251,6 +279,23 @@ npm run dev
 
 Then open **<http://localhost:5173>** in a browser.
 
+### Run the backend (optional)
+
+In a second terminal, from the project folder:
+
+```bash
+npm run setup:backend
+```
+
+```bash
+npm start
+```
+
+The first command installs the backend's packages and creates the SQLite database
+with sample monitoring stations. The second starts the API on
+**<http://localhost:5001>**. The Vite dev server forwards `/api` requests to it, and
+the Water Quality page shows **"Saved to server"** once it is connected.
+
 That is the whole setup. There is **no API key to obtain** and **no `.env` file to
 create** — every data source the project uses is free and key-less. The
 `.env.example` file exists only to document the optional API base-URL overrides.
@@ -277,12 +322,16 @@ npm run preview
 | `npm run test` | Run the full test suite once |
 | `npm run test:watch` | Run tests in watch mode while developing |
 | `npm run typecheck` | Type-check without emitting output |
+| `npm run setup:backend` | Install backend packages, create the SQLite database and seed it |
+| `npm start` | Start the backend API on port 5001 |
+| `npm run dev:backend` | Start the backend with auto-restart on file changes |
+| `npm run test:backend` | Run the backend API tests (on a temporary copy of the database) |
 
 ---
 
 ## Data sources and APIs
 
-All four sources are free and require **no API key or registration**.
+All five sources are free and require **no API key or registration**.
 
 | Source | Used for | Documentation |
 | --- | --- | --- |
@@ -290,6 +339,7 @@ All four sources are free and require **no API key or registration**.
 | Open-Meteo Weather Forecast API | Temperature, relative humidity, wind speed, precipitation | <https://open-meteo.com/en/docs> |
 | Open-Meteo Geocoding API | City search (backed by the GeoNames database) | <https://open-meteo.com/en/docs/geocoding-api> |
 | OpenStreetMap raster tiles | Base map layer | <https://www.openstreetmap.org/copyright> |
+| BigDataCloud reverse geocoding | Naming the place for "Use my current location" | <https://www.bigdatacloud.com/free-api/free-reverse-geocode-to-city-api> |
 
 ### About the air quality values
 
@@ -349,6 +399,12 @@ those records live in your browser.
 
 ```
 environment-monitoring-system/
+├── backend/                   Express + Prisma + SQLite REST API
+│   ├── prisma/                Database schema and seed script
+│   ├── src/routes/            /api/water-samples routes and validation
+│   ├── src/utils/             AQI and WQI calculators
+│   ├── test/                  API tests (node:test)
+│   └── server.js              App setup and the location endpoints
 ├── docs/                      Project documentation and screenshots
 ├── public/                    Static assets (favicon)
 ├── src/
@@ -362,11 +418,11 @@ environment-monitoring-system/
 │   │   ├── ErrorBoundary.tsx  Catches render errors
 │   │   ├── LocationSearch.tsx Debounced city search
 │   │   └── StatCard.tsx       Metric tile and page header
-│   ├── context/               Settings, locations, water records, environment data
-│   ├── hooks/                 useEnvironmentData — fetching, refresh, abort
+│   ├── context/               Settings, locations, water records, environment data, toasts
+│   ├── hooks/                 useEnvironmentData, useCityComparison
 │   ├── lib/                   aqi, wqi, csv, storage, guards, format, id
 │   ├── pages/                 One file per route
-│   ├── services/              API clients, demo data generators, HTTP helper
+│   ├── services/              API clients, backend client, demo data, HTTP helper
 │   ├── test/                  Test environment setup
 │   └── types/                 Shared domain types
 ├── .env.example               Optional API base-URL overrides (not required)
@@ -386,7 +442,7 @@ environment-monitoring-system/
 npm run test
 ```
 
-**181 tests across 11 files**, covering:
+**203 tests across 12 files**, plus **12 backend API tests** (`npm run test:backend`), covering:
 
 | Area | What is tested |
 | --- | --- |
@@ -400,7 +456,9 @@ npm run test
 | `services/demoData` | Demo labelling, determinism, physical plausibility |
 | `context/WaterContext` | Full CRUD lifecycle, sorting, persistence, restore after remount, corrupt-data recovery |
 | `components/.../WaterMeasurementForm` | Validation, range checks, submission payload, edit prefill |
-| `App` | Every navigation item renders its page, provenance labelling, API-failure recovery |
+| `App` | Every navigation item renders its page, provenance labelling, API-failure recovery, command menu, alert banner, compare and report pages |
+| `features` | Command filtering, alert threshold, city ranking, forecast extremes, live water score, sync merge, server stats, AQI CSV export |
+| `backend/test` | Health, locations, create/update/validate/delete water samples, statistics, bad JSON, unknown routes |
 
 Verified results are recorded in [`docs/PROJECT_REPORT.md`](docs/PROJECT_REPORT.md).
 
@@ -422,15 +480,16 @@ These are real constraints of the project, stated honestly.
 4. **The six water parameters cannot establish drinking-water safety.** That needs
    bacteriological testing, heavy metals and residual disinfectant, against the
    locally applicable standard. The application repeats this wherever a score appears.
-5. **Data is stored per browser.** `localStorage` does not sync between devices or
-   browsers, and clearing site data erases the records. CSV export is the backup path.
-6. **Air quality is fetched only for the active location,** so other saved locations
-   show a neutral pin on the map rather than a guessed value.
+5. **Settings and saved cities are stored per browser.** Water records are copied to
+   the backend when it runs, but the backend has no user accounts, so everyone using
+   the same server shares one set of records. CSV export remains the backup path.
+6. **Forecasts are model estimates.** The next-24-hour forecast comes from the same
+   CAMS model as the current values and is labelled as a forecast, not a measurement.
 7. **Hourly values compared against 24-hour breakpoints** are an approximation. EPA
    particulate breakpoints assume a 24-hour average; the application charts hourly
    values, which is why the trend matters more than any single reading.
-8. **No authentication or multi-user support.** The application is single-user by
-   design, with no backend.
+8. **No authentication or multi-user support.** The backend is meant for a single
+   user or a classroom demo, not public deployment.
 9. **Ozone above 0.200 ppm** falls outside the EPA 8-hour table; the application caps
    the sub-index and flags it as capped rather than extrapolating.
 
@@ -442,11 +501,10 @@ These are real constraints of the project, stated honestly.
   second, clearly labelled source, with a user-selectable index standard
 - Accept CSV import of laboratory results, so bulk measurements can be loaded
 - Add bacteriological and heavy-metal fields to the water record
-- Compare multiple locations side by side on one chart
-- Export a formatted PDF report for a selected location and period
+- Overlay several cities on one historical chart
 - Offline support via a service worker, caching the last successful response
-- Browser notifications when AQI crosses a user-set threshold
-- Optional backend so records can sync across devices and be shared by a team
+- Browser push notifications when AQI crosses the alert threshold
+- User accounts on the backend so each person's records stay separate
 
 ---
 
