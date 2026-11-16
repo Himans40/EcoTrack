@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const { PrismaClient } = require('@prisma/client');
 const { calculateAQI, calculateWQI } = require('./src/utils/calculators');
+const { waterSamplesRouter } = require('./src/routes/waterSamples');
 
 // Load environment variables from .env
 dotenv.config();
@@ -16,7 +17,7 @@ const PORT = process.env.PORT || 5001;
 // Middleware Configuration
 // ==========================================
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 // ==========================================
 // In-Memory Fallback Seed Data (Safe presentation fallback if DB offline)
@@ -450,6 +451,25 @@ app.post('/api/mock-sensor', async (req, res) => {
       error: error.message || 'Unknown internal error',
     });
   }
+});
+
+// ==========================================
+// 5. Water samples recorded in the web app
+// ==========================================
+app.use('/api/water-samples', waterSamplesRouter(prisma));
+
+// Unknown API routes and unexpected errors always answer in JSON.
+app.use('/api', (req, res) => {
+  res.status(404).json({ success: false, message: `No route for ${req.method} ${req.originalUrl}` });
+});
+
+// eslint-disable-next-line no-unused-vars
+app.use((error, req, res, next) => {
+  if (error.type === 'entity.parse.failed') {
+    return res.status(400).json({ success: false, message: 'Request body is not valid JSON.' });
+  }
+  console.error(error);
+  res.status(500).json({ success: false, message: 'Internal server error.' });
 });
 
 // ==========================================
