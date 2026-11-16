@@ -278,7 +278,7 @@ export default function OverviewPage() {
                   </div>
                   <div className="text-right">
                     <p
-                      className="text-3xl font-bold tabular-nums"
+                      className="text-3xl font-bold"
                       style={{ color: latestWaterAssessment.hex }}
                     >
                       {latestWaterAssessment.score}
@@ -298,7 +298,7 @@ export default function OverviewPage() {
                       <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         {parameter.label}
                       </p>
-                      <p className="mt-0.5 text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+                      <p className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
                         {parameter.value}
                         {parameter.unit ? (
                           <span className="ml-1 text-[11px] font-normal text-slate-500 dark:text-slate-400">

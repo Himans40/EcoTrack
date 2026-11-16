@@ -129,7 +129,7 @@ export function AqiGauge({ aqi }: { aqi: number | null }) {
 
       <div className="-mt-10 flex flex-col items-center">
         <span
-          className="text-5xl font-bold leading-none tabular-nums"
+          className="text-5xl font-bold leading-none"
           style={{ color: category?.hex }}
         >
           {aqi === null ? '—' : Math.round(aqi)}
@@ -234,7 +234,7 @@ export function PollutantCard({
       </div>
 
       <p className="mt-3 flex items-baseline gap-1">
-        <span className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+        <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           {formatNumber(reading.value, 1)}
         </span>
         <span className="text-xs text-slate-500 dark:text-slate-400">{meta.unit}</span>

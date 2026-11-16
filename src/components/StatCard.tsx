@@ -21,26 +21,26 @@ export function StatCard({
   origin?: DataOrigin
 }) {
   return (
-    <div className="card p-4">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-          {label}
-        </p>
+    <div className="card flex flex-col p-4 sm:p-5">
+      <div className="flex items-center gap-2">
         {icon ? <span className={`shrink-0 ${accentClass}`}>{icon}</span> : null}
+        <p className="text-[13px] text-slate-500 dark:text-slate-400">{label}</p>
       </div>
-      <p className="mt-2 flex items-baseline gap-1">
-        <span className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+      <p className="mt-3 flex items-baseline gap-1.5">
+        <span className="text-[2rem] font-medium leading-none tracking-tight text-slate-900 dark:text-white">
           {value}
         </span>
         {unit ? (
-          <span className="text-xs text-slate-500 dark:text-slate-400">{unit}</span>
+          <span className="text-sm text-slate-500 dark:text-slate-400">{unit}</span>
         ) : null}
       </p>
       {footer ? (
-        <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">{footer}</div>
+        <div className="mt-2 text-[13px] leading-snug text-slate-500 dark:text-slate-400">
+          {footer}
+        </div>
       ) : null}
       {origin ? (
-        <div className="mt-2.5">
+        <div className="mt-auto pt-3">
           <OriginBadge origin={origin} />
         </div>
       ) : null}
@@ -59,13 +59,13 @@ export function PageHeader({
   actions?: ReactNode
 }) {
   return (
-    <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
-        <h1 className="text-xl font-bold text-slate-900 sm:text-2xl dark:text-slate-100">
+        <h1 className="text-2xl font-semibold text-slate-900 sm:text-[1.75rem] dark:text-white">
           {title}
         </h1>
         {description ? (
-          <p className="mt-1 max-w-3xl text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-1.5 max-w-2xl text-[15px] leading-relaxed text-slate-600 dark:text-slate-400">
             {description}
           </p>
         ) : null}

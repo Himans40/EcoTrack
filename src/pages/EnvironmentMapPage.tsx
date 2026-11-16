@@ -184,7 +184,7 @@ export default function EnvironmentMapPage() {
                 <dt className="text-slate-600 dark:text-slate-400">
                   Other saved locations
                 </dt>
-                <dd className="font-medium tabular-nums text-slate-900 dark:text-slate-100">
+                <dd className="font-medium text-slate-900 dark:text-slate-100">
                   {Math.max(0, savedLocations.length - 1)}
                 </dd>
               </div>
@@ -192,7 +192,7 @@ export default function EnvironmentMapPage() {
                 <dt className="text-slate-600 dark:text-slate-400">
                   Water samples with coordinates
                 </dt>
-                <dd className="font-medium tabular-nums text-slate-900 dark:text-slate-100">
+                <dd className="font-medium text-slate-900 dark:text-slate-100">
                   {mappableWater.length}
                 </dd>
               </div>

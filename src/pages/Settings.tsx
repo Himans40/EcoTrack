@@ -318,7 +318,7 @@ export default function SettingsPage() {
               <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 Your water records
               </dt>
-              <dd className="mt-0.5 text-xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+              <dd className="mt-0.5 text-xl font-bold text-slate-900 dark:text-slate-100">
                 {userCount}
               </dd>
             </div>
@@ -326,7 +326,7 @@ export default function SettingsPage() {
               <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 Demonstration samples
               </dt>
-              <dd className="mt-0.5 text-xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+              <dd className="mt-0.5 text-xl font-bold text-slate-900 dark:text-slate-100">
                 {demoCount}
               </dd>
             </div>
@@ -334,7 +334,7 @@ export default function SettingsPage() {
               <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 Saved locations
               </dt>
-              <dd className="mt-0.5 text-xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+              <dd className="mt-0.5 text-xl font-bold text-slate-900 dark:text-slate-100">
                 {savedLocations.length}
               </dd>
             </div>
