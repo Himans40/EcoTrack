@@ -446,7 +446,3 @@ npm run test
 
 Start with **`docs/DEMO_GUIDE.md`**. It is written specifically to prepare you for
 presenting and defending this project.
-
-One thing to complete before submitting: open
-**`docs/AI_DEVELOPMENT_LOG.md`** and paste your Claude conversation share link into
-the placeholder at the top, if your college asks for it.

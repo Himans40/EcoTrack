@@ -457,7 +457,6 @@ These are real constraints of the project, stated honestly.
 | [`docs/PROJECT_REPORT.md`](docs/PROJECT_REPORT.md) | Full project report: abstract, literature background, requirements, design, implementation, testing methodology, verified results, conclusion |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Component structure, data flow, API request lifecycle, persistence, chart implementation |
 | [`docs/DEMO_GUIDE.md`](docs/DEMO_GUIDE.md) | Five-minute demonstration walkthrough and likely viva questions with answers |
-| [`docs/AI_DEVELOPMENT_LOG.md`](docs/AI_DEVELOPMENT_LOG.md) | How AI assistance was used during development |
 | [`GITHUB_UPLOAD_GUIDE.md`](GITHUB_UPLOAD_GUIDE.md) | Beginner-friendly guide to running the project and uploading it to GitHub |
 
 ---
